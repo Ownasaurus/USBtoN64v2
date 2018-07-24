@@ -1,0 +1,15 @@
+main.c:106:6:SetN64DataInputMode	4	static
+main.c:113:6:SetN64DataOutputMode	4	static
+main.c:120:6:write_1	8	static
+main.c:128:6:write_0	8	static
+main.c:136:6:SendStop	8	static
+main.c:144:6:SendByte	24	static
+main.c:159:6:SendIdentity	8	static
+main.c:168:6:SendControllerData	24	static
+main.c:190:14:GetMiddleOfPulse	8	static
+main.c:213:14:readCommand	16	static
+main.c:242:5:main	8	static
+main.c:299:6:SystemClock_Config	184	static
+main.c:362:13:MX_USART2_UART_Init	8	static
+main.c:389:13:MX_GPIO_Init	48	static
+main.c:488:6:_Error_Handler	16	static
