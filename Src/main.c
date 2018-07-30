@@ -52,8 +52,8 @@
 #include "usb_host.h"
 
 /* USER CODE BEGIN Includes */
-
 #include <string.h>
+#include "usbh_hid_ds3.h"
 
 /* USER CODE END Includes */
 
@@ -62,31 +62,7 @@ UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
-struct __attribute__((packed)) N64ControllerData // all bits are in the correct order... except for the analog
-{
-    unsigned int a : 1; // 1 bit wide
-    unsigned int b : 1;
-    unsigned int z : 1;
-    unsigned int start : 1;
-    unsigned int up : 1;
-    unsigned int down : 1;
-    unsigned int left : 1;
-    unsigned int right : 1;
-
-    unsigned int dummy1 : 1;
-    unsigned int dummy2 : 1;
-    unsigned int l : 1;
-    unsigned int r : 1;
-    unsigned int c_up : 1;
-    unsigned int c_down : 1;
-    unsigned int c_left : 1;
-    unsigned int c_right : 1;
-
-    char x_axis;
-
-    char y_axis;
-
-} n64_data;
+N64ControllerData n64_data;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -102,6 +78,14 @@ void my_wait_us_asm(int n);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
+uint8_t reverse(uint8_t b)
+{
+   b = (b & 0xF0) >> 4 | (b & 0x0F) << 4;
+   b = (b & 0xCC) >> 2 | (b & 0x33) << 2;
+   b = (b & 0xAA) >> 1 | (b & 0x55) << 1;
+   return b;
+}
 
 void SetN64DataInputMode()
 {
@@ -275,12 +259,6 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	  //GPIOC->BSRR = (1 << 6); // debug pin high
-	  //GPIOC->BSRR = (1 << 22); // debug pin low
-	  GPIOA->BSRR = (1 << 5);
-	  HAL_Delay(1000);
-	  GPIOA->BSRR = (1 << 21);
-	  HAL_Delay(1000);
 
   /* USER CODE END WHILE */
     MX_USB_HOST_Process();
@@ -469,9 +447,6 @@ static void MX_GPIO_Init(void)
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI9_5_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(EXTI9_5_IRQn);
-
-  HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
 
 }
 

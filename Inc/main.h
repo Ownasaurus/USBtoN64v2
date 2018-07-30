@@ -54,14 +54,13 @@
 /* Includes ------------------------------------------------------------------*/
 
 /* USER CODE BEGIN Includes */
-
+#include <stdint.h>
 /* USER CODE END Includes */
 
 /* Private define ------------------------------------------------------------*/
 
 #define B1_Pin GPIO_PIN_13
 #define B1_GPIO_Port GPIOC
-#define B1_EXTI_IRQn EXTI15_10_IRQn
 #define USART_TX_Pin GPIO_PIN_2
 #define USART_TX_GPIO_Port GPIOA
 #define USART_RX_Pin GPIO_PIN_3
@@ -86,7 +85,33 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
+typedef struct __attribute__((packed))
+{
+    unsigned int a : 1; // 1 bit wide
+    unsigned int b : 1;
+    unsigned int z : 1;
+    unsigned int start : 1;
+    unsigned int up : 1;
+    unsigned int down : 1;
+    unsigned int left : 1;
+    unsigned int right : 1;
 
+    unsigned int dummy1 : 1;
+    unsigned int dummy2 : 1;
+    unsigned int l : 1;
+    unsigned int r : 1;
+    unsigned int c_up : 1;
+    unsigned int c_down : 1;
+    unsigned int c_left : 1;
+    unsigned int c_right : 1;
+
+    char x_axis;
+
+    char y_axis;
+
+} N64ControllerData; // all bits are in the correct order... except for the analog
+
+uint8_t reverse(uint8_t b);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

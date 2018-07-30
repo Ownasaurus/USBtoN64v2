@@ -1,0 +1,6 @@
+usbh_msc_bot.c:109:20:USBH_MSC_BOT_REQ_Reset	16	static
+usbh_msc_bot.c:130:20:USBH_MSC_BOT_REQ_GetMaxLUN	16	static
+usbh_msc_bot.c:151:20:USBH_MSC_BOT_Init	24	static
+usbh_msc_bot.c:173:20:USBH_MSC_BOT_Process	40	static
+usbh_msc_bot.c:475:27:USBH_MSC_BOT_Abort	24	static
+usbh_msc_bot.c:514:29:USBH_MSC_DecodeCSW	24	static

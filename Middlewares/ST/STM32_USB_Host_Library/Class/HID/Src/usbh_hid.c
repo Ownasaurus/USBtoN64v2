@@ -42,7 +42,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_hid.h"
 #include "usbh_hid_parser.h"
-
+//#include "usbh_hid_keybd.h"
+extern N64ControllerData n64_data;
 
 /** @addtogroup USBH_LIB
 * @{
@@ -105,8 +106,8 @@ static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_SOFProcess(USBH_HandleTypeDef *phost);
 static void  USBH_HID_ParseHIDDesc (HID_DescTypeDef *desc, uint8_t *buf);
 
-extern USBH_StatusTypeDef USBH_HID_MouseInit(USBH_HandleTypeDef *phost);
-extern USBH_StatusTypeDef USBH_HID_KeybdInit(USBH_HandleTypeDef *phost);
+//extern USBH_StatusTypeDef USBH_HID_MouseInit(USBH_HandleTypeDef *phost);
+//extern USBH_StatusTypeDef USBH_HID_KeybdInit(USBH_HandleTypeDef *phost);
 
 USBH_ClassTypeDef  HID_Class = 
 {
@@ -145,6 +146,9 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
   HID_HandleTypeDef *HID_Handle;
   
   interface = USBH_FindInterface(phost, phost->pActiveClass->ClassCode, HID_BOOT_CODE, 0xFF);
+
+  if (interface == 0xFF) // did not find KB or mouse
+	  interface = USBH_FindInterface(phost, phost->pActiveClass->ClassCode, 0, 0xFF); // try looking for ds3
   
   if(interface == 0xFF) /* No Valid Interface */
   {
@@ -169,6 +173,11 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
       USBH_UsrLog ("Mouse device found!");         
       HID_Handle->Init =  USBH_HID_MouseInit;     
     }
+    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol  == HID_DS3_BOOT_CODE)
+	{
+	  USBH_UsrLog ("DS3 device found!");
+	  HID_Handle->Init =  USBH_HID_DS3Init;
+	}
     else
     {
       USBH_UsrLog ("Protocol not supported.");  
@@ -186,7 +195,7 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
       HID_Handle->poll = HID_MIN_POLL;
     }
     
-    /* Check fo available number of endpoints */
+    /* Check for available number of endpoints */
     /* Find the number of EPs in the Interface Descriptor */      
     /* Choose the lower number in order not to overrun the buffer allocated */
     max_ep = ( (phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bNumEndpoints <= USBH_MAX_NUM_ENDPOINTS) ? 
@@ -280,7 +289,7 @@ USBH_StatusTypeDef USBH_HID_InterfaceDeInit (USBH_HandleTypeDef *phost )
   */
 static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
 {   
-  
+  uint8_t enable[4] = {0x42, 0x0C, 0x00, 0x00};
   USBH_StatusTypeDef status         = USBH_BUSY;
   USBH_StatusTypeDef classReqStatus = USBH_BUSY;
   HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData; 
@@ -307,12 +316,23 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
     if (USBH_HID_GetHIDReportDescriptor(phost, HID_Handle->HID_Desc.wItemLength) == USBH_OK)
     {
       /* The descriptor is available in phost->device.Data */
-
-      HID_Handle->ctl_state = HID_REQ_SET_IDLE;
+    	if(phost->device.DevDesc.idVendor == 0x054C && phost->device.DevDesc.idProduct == 0x0268) // DS3 Sixaxis
+    	{
+    		HID_Handle->ctl_state = HID_PS3_BOOTCODE;
+    	}
+    	else HID_Handle->ctl_state = HID_REQ_SET_IDLE;
     }
     
     break;
     
+  case HID_PS3_BOOTCODE:
+	  if(USBH_HID_SetReport(phost,0x03,0xF4,enable,4) == USBH_OK)
+	  {
+		  HID_Handle->ctl_state = HID_REQ_IDLE; // enable ps3 communication
+		  status = USBH_OK;
+	  }
+	  break;
+
   case HID_REQ_SET_IDLE:
     
     classReqStatus = USBH_HID_SetIdle (phost, 0, 0);
@@ -324,7 +344,7 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
     }
     else if(classReqStatus == USBH_NOT_SUPPORTED) 
     {
-      HID_Handle->ctl_state = HID_REQ_SET_PROTOCOL;        
+      HID_Handle->ctl_state = HID_REQ_SET_PROTOCOL; // Why if it's not supported would we set it to this state?!
     } 
     break; 
     
@@ -667,6 +687,11 @@ HID_TypeTypeDef USBH_HID_GetDeviceType(USBH_HandleTypeDef *phost)
     {
       type=  HID_MOUSE;  
     }
+    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol \
+	  == HID_DS3_BOOT_CODE)
+	{
+	  type=  HID_DS3;
+	}
   }
   return type;
 }
@@ -797,7 +822,186 @@ uint16_t  fifo_write(FIFO_TypeDef * f, const void * buf, uint16_t  nbytes)
 */
 __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 {
-  
+	HID_TypeTypeDef type = HID_UNKNOWN;
+	HID_KEYBD_Info_TypeDef* kb_state = NULL;
+	HID_DS3_Info_TypeDef* ds3_state = NULL;
+
+	type = USBH_HID_GetDeviceType(phost);
+
+	memset(&n64_data,0,4);
+
+	switch(type)
+	{
+		case HID_KEYBOARD:
+			kb_state = USBH_HID_GetKeybdInfo(phost);
+
+			for(int index = 0;index < 6;index++)
+			{
+				if(kb_state->keys[index] == KEY_A)
+				{
+					n64_data.a = 1;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_S)
+				{
+					n64_data.b = 1;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_D)
+				{
+					n64_data.z = 1;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_F)
+				{
+					n64_data.r = 1;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_W)
+				{
+					n64_data.c_up = 1;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_1_EXCLAMATION_MARK)
+				{
+					n64_data.l = 1;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_ENTER)
+				{
+					n64_data.start = 1;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_UPARROW)
+				{
+					n64_data.y_axis = 0x26;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_DOWNARROW)
+				{
+					n64_data.y_axis = 0x39;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_LEFTARROW)
+				{
+					n64_data.x_axis = 0x39;
+					continue;
+				}
+				if(kb_state->keys[index] == KEY_RIGHTARROW)
+				{
+					n64_data.x_axis = 0x26;
+					continue;
+				}
+
+			}
+			break;
+		case HID_DS3:
+			ds3_state = USBH_HID_GetDS3Info(phost);
+
+			if(ds3_state->x)
+			{
+				n64_data.a = 1;
+			}
+			if(ds3_state->triangle)
+			{
+				n64_data.c_up = 1;
+			}
+			if(ds3_state->square)
+			{
+				n64_data.b = 1;
+			}
+			if(ds3_state->circle)
+			{
+				n64_data.c_right = 1;
+			}
+			if(ds3_state->L1)
+			{
+				n64_data.l = 1;
+			}
+			if(ds3_state->R1)
+			{
+				n64_data.r = 1;
+			}
+			if(ds3_state->R2)
+			{
+				n64_data.z = 1;
+			}
+			if(ds3_state->L2)
+			{
+				n64_data.c_left = 1;
+			}
+			if(ds3_state->start)
+			{
+				n64_data.start = 1;
+			}
+			if(ds3_state->select)
+			{
+				n64_data.c_down = 1;
+			}
+			if(ds3_state->d_up)
+			{
+				n64_data.up = 1;
+			}
+			if(ds3_state->d_down)
+			{
+				n64_data.down = 1;
+			}
+			if(ds3_state->d_left)
+			{
+				n64_data.left = 1;
+			}
+			if(ds3_state->d_right)
+			{
+				n64_data.right = 1;
+			}
+
+			// ----- begin nrage replication analog code -----
+			const int sensitivity = 100;
+			const int dead_zone = 20;
+			const float DS3_MAX = 128;
+			const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
+			//const float N64_MAX = 127;
+			float deadzoneValue = (dead_zone/100.0f) * DS3_MAX;
+			float deadzoneRelation = DS3_MAX / (DS3_MAX - deadzoneValue);
+
+			int8_t LSX = 0, LSY = 0; // -128 to +127...
+			float unscaled_result = 0;
+			int8_t stick_lx = ds3_state->LAnalogX - 128;
+			int8_t stick_ly = ds3_state->LAnalogY - 128;
+
+			if(stick_lx >= deadzoneValue) // positive = right
+			{
+				unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+				LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+			}
+			else if(stick_lx <= (-deadzoneValue)) // negative = left
+			{
+				stick_lx = -stick_lx; // compute as positive, then negate at the end
+				unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+				LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+				LSX = -LSX;
+			}
+
+			if(stick_ly >= deadzoneValue) // DS3 positive = down
+			{
+				unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+				LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+				LSY = -LSY; // for n64 down is negative
+			}
+			else if(stick_ly <= (-deadzoneValue)) // DS3 negative = down
+			{
+				stick_ly = -stick_ly; // compute as positive, then negate at the end
+				unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+				LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+				//LSY = -LSY; LSY = -LSY; // for n64 up is positive
+			}
+			n64_data.x_axis = reverse((uint8_t)LSX);
+			n64_data.y_axis = reverse((uint8_t)LSY);
+			// end of analog code
+			break;
+		default:
+			break;
+	}
 }
 /**
 * @}

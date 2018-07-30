@@ -1,0 +1,4 @@
+usbh_hid_ds3.c:23:6:DS3_Led	88	static
+usbh_hid_ds3.c:53:20:USBH_HID_DS3Init	24	static
+usbh_hid_ds3.c:73:27:USBH_HID_DS3Decode	24	static
+usbh_hid_ds3.c:97:23:USBH_HID_GetDS3Info	16	static

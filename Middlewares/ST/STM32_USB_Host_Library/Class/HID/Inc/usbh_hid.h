@@ -37,6 +37,7 @@
 #include "usbh_core.h"
 #include "usbh_hid_mouse.h"
 #include "usbh_hid_keybd.h"
+#include "usbh_hid_ds3.h"
  
 /** @addtogroup USBH_LIB
   * @{
@@ -130,6 +131,7 @@ typedef enum
   HID_REQ_SET_IDLE,
   HID_REQ_SET_PROTOCOL,
   HID_REQ_SET_REPORT,
+  HID_PS3_BOOTCODE,
 
 }
 HID_CtlStateTypeDef;
@@ -138,6 +140,7 @@ typedef enum
 {
   HID_MOUSE    = 0x01,
   HID_KEYBOARD = 0x02,
+  HID_DS3 = 0x03,
   HID_UNKNOWN = 0xFF,
 }
 HID_TypeTypeDef;
@@ -258,6 +261,7 @@ HID_HandleTypeDef;
 #define HID_BOOT_CODE                                  0x01    
 #define HID_KEYBRD_BOOT_CODE                           0x01
 #define HID_MOUSE_BOOT_CODE                            0x02
+#define HID_DS3_BOOT_CODE                              0x00
 
 
 /**
