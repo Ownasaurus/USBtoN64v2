@@ -42,8 +42,17 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_hid.h"
 #include "usbh_hid_parser.h"
-//#include "usbh_hid_keybd.h"
 extern N64ControllerData n64_data;
+
+//uint8_t ledpattern[7] = {0x02, 0x04, 0x08, 0x10, 0x12, 0x14, 0x18 };
+static uint8_t led_buffer[] = {  0x00, 0x00, 0x00, 0x00, 0xFF, 0x80, 0x00, 0x00,
+							  0x02, /* LED_1 = 0x02, LED_2 = 0x04, ... */
+							  0xff, 0x27, 0x10, 0x00, 0x32,
+							  0xff, 0x27, 0x10, 0x00, 0x32,
+							  0xff, 0x27, 0x10, 0x00, 0x32,
+							  0xff, 0x27, 0x10, 0x00, 0x32,// 29 bytes
+							  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // 48 bytes
+
 
 /** @addtogroup USBH_LIB
 * @{
@@ -105,9 +114,6 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_SOFProcess(USBH_HandleTypeDef *phost);
 static void  USBH_HID_ParseHIDDesc (HID_DescTypeDef *desc, uint8_t *buf);
-
-//extern USBH_StatusTypeDef USBH_HID_MouseInit(USBH_HandleTypeDef *phost);
-//extern USBH_StatusTypeDef USBH_HID_KeybdInit(USBH_HandleTypeDef *phost);
 
 USBH_ClassTypeDef  HID_Class = 
 {
@@ -328,10 +334,19 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
   case HID_PS3_BOOTCODE:
 	  if(USBH_HID_SetReport(phost,0x03,0xF4,enable,4) == USBH_OK)
 	  {
-		  HID_Handle->ctl_state = HID_REQ_IDLE; // enable ps3 communication
-		  status = USBH_OK;
+		  HID_Handle->ctl_state = HID_PS3_LED;
+		  //status = USBH_OK;
 	  }
 	  break;
+  case HID_PS3_LED:
+	  status = USBH_HID_SetReport(phost,0x02,0x01,led_buffer,sizeof(led_buffer));
+  	  if(status == USBH_OK)
+  	  {
+  		  HID_Handle->ctl_state = HID_REQ_IDLE; // enable ps3 communication
+
+  		  status = USBH_OK;
+  	  }
+  	  break;
 
   case HID_REQ_SET_IDLE:
     
@@ -820,139 +835,148 @@ uint16_t  fifo_write(FIFO_TypeDef * f, const void * buf, uint16_t  nbytes)
 *  @param  phost: Selected device
 * @retval None
 */
+
 __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 {
 	HID_TypeTypeDef type = HID_UNKNOWN;
 	HID_KEYBD_Info_TypeDef* kb_state = NULL;
 	HID_DS3_Info_TypeDef* ds3_state = NULL;
+	N64ControllerData new_data;
 
 	type = USBH_HID_GetDeviceType(phost);
-
-	memset(&n64_data,0,4);
 
 	switch(type)
 	{
 		case HID_KEYBOARD:
 			kb_state = USBH_HID_GetKeybdInfo(phost);
 
+			memset(&new_data,0,4);
+
 			for(int index = 0;index < 6;index++)
 			{
 				if(kb_state->keys[index] == KEY_A)
 				{
-					n64_data.a = 1;
+					new_data.a = 1;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_S)
 				{
-					n64_data.b = 1;
+					new_data.b = 1;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_D)
 				{
-					n64_data.z = 1;
+					new_data.z = 1;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_F)
 				{
-					n64_data.r = 1;
+					new_data.r = 1;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_W)
 				{
-					n64_data.c_up = 1;
+					new_data.c_up = 1;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_1_EXCLAMATION_MARK)
 				{
-					n64_data.l = 1;
+					new_data.l = 1;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_ENTER)
 				{
-					n64_data.start = 1;
+					new_data.start = 1;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_UPARROW)
 				{
-					n64_data.y_axis = 0x26;
+					new_data.y_axis = 0x26;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_DOWNARROW)
 				{
-					n64_data.y_axis = 0x39;
+					new_data.y_axis = 0x39;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_LEFTARROW)
 				{
-					n64_data.x_axis = 0x39;
+					new_data.x_axis = 0x39;
 					continue;
 				}
 				if(kb_state->keys[index] == KEY_RIGHTARROW)
 				{
-					n64_data.x_axis = 0x26;
+					new_data.x_axis = 0x26;
 					continue;
 				}
 
 			}
+
+			// atomic update of n64 state
+			__disable_irq();
+			memcpy(&n64_data, &new_data,4);
+			__enable_irq();
 			break;
 		case HID_DS3:
 			ds3_state = USBH_HID_GetDS3Info(phost);
 
+			memset(&new_data,0,4);
+
 			if(ds3_state->x)
 			{
-				n64_data.a = 1;
+				new_data.a = 1;
 			}
 			if(ds3_state->triangle)
 			{
-				n64_data.c_up = 1;
+				new_data.c_up = 1;
 			}
 			if(ds3_state->square)
 			{
-				n64_data.b = 1;
+				new_data.b = 1;
 			}
 			if(ds3_state->circle)
 			{
-				n64_data.c_right = 1;
+				new_data.c_right = 1;
 			}
 			if(ds3_state->L1)
 			{
-				n64_data.l = 1;
+				new_data.l = 1;
 			}
 			if(ds3_state->R1)
 			{
-				n64_data.r = 1;
+				new_data.r = 1;
 			}
 			if(ds3_state->R2)
 			{
-				n64_data.z = 1;
+				new_data.z = 1;
 			}
 			if(ds3_state->L2)
 			{
-				n64_data.c_left = 1;
+				new_data.c_left = 1;
 			}
 			if(ds3_state->start)
 			{
-				n64_data.start = 1;
+				new_data.start = 1;
 			}
 			if(ds3_state->select)
 			{
-				n64_data.c_down = 1;
+				new_data.c_down = 1;
 			}
 			if(ds3_state->d_up)
 			{
-				n64_data.up = 1;
+				new_data.up = 1;
 			}
 			if(ds3_state->d_down)
 			{
-				n64_data.down = 1;
+				new_data.down = 1;
 			}
 			if(ds3_state->d_left)
 			{
-				n64_data.left = 1;
+				new_data.left = 1;
 			}
 			if(ds3_state->d_right)
 			{
-				n64_data.right = 1;
+				new_data.right = 1;
 			}
 
 			// ----- begin nrage replication analog code -----
@@ -995,9 +1019,14 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
 				//LSY = -LSY; LSY = -LSY; // for n64 up is positive
 			}
-			n64_data.x_axis = reverse((uint8_t)LSX);
-			n64_data.y_axis = reverse((uint8_t)LSY);
+			new_data.x_axis = reverse((uint8_t)LSX);
+			new_data.y_axis = reverse((uint8_t)LSY);
 			// end of analog code
+
+			// atomic update of n64 state
+			__disable_irq();
+			memcpy(&n64_data, &new_data,4);
+			__enable_irq();
 			break;
 		default:
 			break;

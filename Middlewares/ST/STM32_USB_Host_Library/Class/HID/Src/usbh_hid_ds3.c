@@ -20,36 +20,6 @@ static const HID_Report_ItemTypedef imp_0_ds3_byte={
   1      /*resolution*/
 };
 
-void DS3_Led(USBH_HandleTypeDef *phost, int i)
-{
-	uint8_t ledpattern[7] = {0x02, 0x04, 0x08, 0x10, 0x12, 0x14, 0x18 };
-	uint8_t abuffer[48] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	                          0x00, 0x02, 0xff, 0x27, 0x10, 0x00, 0x32, 0xff,
-	                          0x27, 0x10, 0x00, 0x32, 0xff, 0x27, 0x10, 0x00,
-	                          0x32, 0xff, 0x27, 0x10, 0x00, 0x32, 0x00, 0x00,
-	                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	                          0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
-
-	if (i < 7) abuffer[9] = ledpattern[i];
-//
-//	uint8_t _ss_attributes_payload[] =
-//	{
-//	    0x52,
-//	    0x00, 0x00, 0x00, 0x00, //Rumble
-//	    0xff, 0x80, //Gyro
-//	    0x00, 0x00,
-//	    0x00, //* LED_1 = 0x02, LED_2 = 0x04, ... */
-//	    0xff, 0x27, 0x10, 0x00, 0x32, /* LED_4 */
-//	    0xff, 0x27, 0x10, 0x00, 0x32, /* LED_3 */
-//	    0xff, 0x27, 0x10, 0x00, 0x32, /* LED_2 */
-//	    0xff, 0x27, 0x10, 0x00, 0x32, /* LED_1 */
-//	};
-//
-//	USBH_StatusTypeDef result = USBH_HID_SetReport(phost,0x02,0x01,_ss_attributes_payload,sizeof(_ss_attributes_payload)); // set the player LED?
-
-	USBH_HID_SetReport(phost,0x02,0x01,abuffer,sizeof(abuffer)); // set the player LED?
-}
-
 USBH_StatusTypeDef USBH_HID_DS3Init(USBH_HandleTypeDef *phost)
 {
 	  HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData;
@@ -63,8 +33,6 @@ USBH_StatusTypeDef USBH_HID_DS3Init(USBH_HandleTypeDef *phost)
 	  }
 	  HID_Handle->pData = (uint8_t*)ds3_report_data;
 	  fifo_init(&HID_Handle->fifo, phost->device.Data, HID_QUEUE_SIZE * sizeof(ds3_report_data));
-
-	  //DS3_Led(phost, 1);
 
 	  return USBH_OK;
 }
@@ -82,8 +50,6 @@ static USBH_StatusTypeDef USBH_HID_DS3Decode(USBH_HandleTypeDef *phost)
   /*Fill report */
   if(fifo_read(&HID_Handle->fifo, &ds3_report_data, HID_Handle->length) ==  HID_Handle->length)
   {
-	//TODO: MAKE THIS WORK
-
 	for(x=0; x < sizeof(HID_DS3_Info_TypeDef); x++)
 	{
 		ds3_data.data[x]=(uint8_t)HID_ReadItem((HID_Report_ItemTypedef *) &imp_0_ds3_byte, x);

@@ -11,6 +11,6 @@ main.c:174:14:GetMiddleOfPulse	8	static
 main.c:197:14:readCommand	16	static
 main.c:226:5:main	8	static
 main.c:277:6:SystemClock_Config	184	static
-main.c:340:13:MX_USART2_UART_Init	8	static
-main.c:367:13:MX_GPIO_Init	48	static
-main.c:463:6:_Error_Handler	16	static
+main.c:402:13:MX_USART2_UART_Init	8	static
+main.c:429:13:MX_GPIO_Init	48	static
+main.c:526:6:_Error_Handler	16	static

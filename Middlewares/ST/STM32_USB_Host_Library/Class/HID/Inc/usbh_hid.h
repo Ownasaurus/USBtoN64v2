@@ -132,7 +132,7 @@ typedef enum
   HID_REQ_SET_PROTOCOL,
   HID_REQ_SET_REPORT,
   HID_PS3_BOOTCODE,
-
+  HID_PS3_LED,
 }
 HID_CtlStateTypeDef;
 

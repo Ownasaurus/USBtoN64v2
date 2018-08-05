@@ -52,6 +52,7 @@
 #include "usb_host.h"
 #include "usbh_core.h"
 #include "usbh_hid.h"
+#include "usbh_xpad.h"
 
 /* USER CODE BEGIN Includes */
 
@@ -104,6 +105,7 @@ void MX_USB_HOST_Init(void)
   USBH_Init(&hUsbHostFS, USBH_UserProcess, HOST_FS);
 
   USBH_RegisterClass(&hUsbHostFS, USBH_HID_CLASS);
+  USBH_RegisterClass(&hUsbHostFS, USBH_XPAD_CLASS);
 
   USBH_Start(&hUsbHostFS);
 

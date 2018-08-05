@@ -79,11 +79,14 @@ void SysTick_Handler(void)
 */
 void EXTI9_5_IRQHandler(void)
 {
+	// A8 is n64 data
+	// C6 is debug pin
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 	// Read 64 command
+	GPIOC->BSRR = (1 << 6); // debug pin C6 high
 	unsigned int cmd = readCommand();
 
-	my_wait_us_asm(2); // wait a small amount of time before replying
+	//my_wait_us_asm(2); // wait a small amount of time before replying
 
 	//-------- SEND RESPONSE
 	SetN64DataOutputMode();
@@ -91,8 +94,6 @@ void EXTI9_5_IRQHandler(void)
 	switch(cmd)
 	{
 	  case 0x00: // identity
-		  SendIdentity();
-		  break;
 	  case 0xFF: // reset
 		  SendIdentity();
 		  break;
@@ -106,6 +107,8 @@ void EXTI9_5_IRQHandler(void)
 	//-------- DONE SENDING RESPOSE
 
 	SetN64DataInputMode();
+
+	GPIOC->BSRR = (1 << 22); // debug pin C6 low
 
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);

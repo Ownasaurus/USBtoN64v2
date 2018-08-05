@@ -1,0 +1,9 @@
+usbh_xpad.c:119:6:XPAD_360_WIRELESS_ProcessInputData	16	static
+usbh_xpad.c:126:6:XPAD_360_WIRED_ProcessInputData	16	static
+usbh_xpad.c:133:6:XPAD_XBONE_ProcessInputData	16	static
+usbh_xpad.c:140:20:USBH_XPAD_Init	16	static
+usbh_xpad.c:153:20:USBH_XPAD_InterfaceInit	56	static
+usbh_xpad.c:270:20:USBH_XPAD_InterfaceDeInit	24	static
+usbh_xpad.c:303:20:USBH_XPAD_ClassRequest	16	static
+usbh_xpad.c:315:20:USBH_XPAD_Process	24	static
+usbh_xpad.c:347:20:USBH_XPAD_SOFProcess	16	static

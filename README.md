@@ -7,11 +7,11 @@ Currently supported USB devices:
 - Playstation Dualshock 3 Sixaxis
 
 Currently known bugs
-- occasional controller disconnects
-- input releases and represses occur during input hold
+- occasional controller disconnects? possibly resolved but needs further testing
 
 TODO:
 - XPAD family support
+- change controls without changing code?
 - fix bugs
 
 By: Ownasaurus
