@@ -99,7 +99,7 @@
 #define USBH_MAX_NUM_ENDPOINTS      2
  
 /*----------   -----------*/
-#define USBH_MAX_NUM_INTERFACES      2
+#define USBH_MAX_NUM_INTERFACES      4
  
 /*----------   -----------*/
 #define USBH_MAX_NUM_CONFIGURATION      1
@@ -117,7 +117,7 @@
 #define USBH_MAX_DATA_BUFFER      512
  
 /*----------   -----------*/
-#define USBH_DEBUG_LEVEL      3
+#define USBH_DEBUG_LEVEL      0
  
 /*----------   -----------*/
 #define USBH_USE_OS      0

@@ -61,7 +61,58 @@
 
 /** @defgroup USBH_TEMPLATE_CLASS_Exported_Types
 * @{
-*/ 
+*/
+
+
+ typedef enum {
+	 LED_OFF    = 0x00,
+	 LED_BLINK  = 0x01,
+	 LED1_FLASH = 0x02,
+	 LED2_FLASH = 0x03,
+	 LED3_FLASH = 0x04,
+	 LED4_FLASH = 0x05,
+	 LED1_ON    = 0x06,
+	 LED2_ON    = 0x07,
+	 LED3_ON    = 0x08,
+	 LED4_ON    = 0x09,
+	 LED_ROTATE = 0x0a,
+	 LED_ALTERNATE = 0x0d,
+ }
+ XPAD_LED;
+
+ typedef enum {
+         XPAD_HAT_UP    = 0x0001,
+         XPAD_HAT_DOWN  = 0x0002,
+         XPAD_HAT_LEFT  = 0x0004,
+         XPAD_HAT_RIGHT = 0x0008,
+         XPAD_START     = 0x0010,
+         XPAD_BACK      = 0x0020,
+         XPAD_STICK_L   = 0x0040,
+         XPAD_STICK_R   = 0x0080,
+         XPAD_PAD_LB    = 0x0100,
+         XPAD_PAD_RB    = 0x0200,
+         XPAD_XLOGO     = 0x0400,
+         XPAD_PAD_A     = 0x1000,
+         XPAD_PAD_B     = 0x2000,
+         XPAD_PAD_X     = 0x4000,
+         XPAD_PAD_Y     = 0x8000,
+         XPAD_BUTTONS   = 0x10000,
+         XPAD_STICK_LX,
+         XPAD_STICK_LY,
+         XPAD_STICK_RX,
+         XPAD_STICK_RY,
+         XPAD_TRIGGER_L,
+         XPAD_TRIGGER_R,
+         XPAD_BATTERY,
+ }
+ XPAD_PAD;
+
+ typedef enum
+ {
+   XPAD_INIT= 0,
+   XPAD_IDLE,
+ }
+ XPAD_StateTypeDef;
 
  typedef enum
  {
@@ -77,6 +128,7 @@
  {
    uint8_t              OutPipe;
    uint8_t              InPipe;
+   XPAD_StateTypeDef    state;
    uint8_t              OutEp;
    uint8_t              InEp;
    uint8_t              *pData;
@@ -128,8 +180,6 @@ extern USBH_ClassTypeDef  XPAD_Class;
 /** @defgroup USBH_TEMPLATE_CLASS_Exported_FunctionsPrototype
 * @{
 */ 
-USBH_StatusTypeDef USBH_XPAD_Process (USBH_HandleTypeDef *phost);
-USBH_StatusTypeDef USBH_XPAD_InterfaceInit (USBH_HandleTypeDef *phost);
 /**
 * @}
 */ 

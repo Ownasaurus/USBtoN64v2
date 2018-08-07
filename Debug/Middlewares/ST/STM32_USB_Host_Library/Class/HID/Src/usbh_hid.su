@@ -15,4 +15,4 @@ usbh_hid.c:721:9:USBH_HID_GetPollInterval	24	static
 usbh_hid.c:746:6:fifo_init	24	static
 usbh_hid.c:763:11:fifo_read	32	static
 usbh_hid.c:801:11:fifo_write	32	static
-usbh_hid.c:839:13:USBH_HID_EventCallback	64	static
+usbh_hid.c:839:13:USBH_HID_EventCallback	72	static

@@ -1,7 +1,7 @@
 usbh_core.c:92:21:USBH_Init	16	static
 usbh_core.c:143:21:USBH_DeInit	8	static
-usbh_core.c:199:21:USBH_RegisterClass	8	static
-usbh_core.c:233:20:USBH_SelectInterface	16	static
+usbh_core.c:199:21:USBH_RegisterClass	0	static
+usbh_core.c:233:20:USBH_SelectInterface	0	static
 usbh_core.c:260:9:USBH_GetActiveClass	0	static
 usbh_core.c:274:10:USBH_FindInterface	4	static
 usbh_core.c:306:10:USBH_FindInterfaceIndex	0	static
