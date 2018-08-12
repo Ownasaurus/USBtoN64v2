@@ -53,60 +53,10 @@ static uint8_t led_buffer[] = {  0x00, 0x00, 0x00, 0x00, 0xFF, 0x80, 0x00, 0x00,
 							  0xff, 0x27, 0x10, 0x00, 0x32,// 29 bytes
 							  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // 48 bytes
 
-
-/** @addtogroup USBH_LIB
-* @{
-*/
-
-/** @addtogroup USBH_CLASS
-* @{
-*/
-
-/** @addtogroup USBH_HID_CLASS
-* @{
-*/
-
-/** @defgroup USBH_HID_CORE 
-* @brief    This file includes HID Layer Handlers for USB Host HID class.
-* @{
-*/ 
-
-/** @defgroup USBH_HID_CORE_Private_TypesDefinitions
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBH_HID_CORE_Private_Defines
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBH_HID_CORE_Private_Macros
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBH_HID_CORE_Private_Variables
-* @{
-*/
-
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBH_HID_CORE_Private_FunctionPrototypes
-* @{
-*/ 
+extern uint8_t state;
+uint8_t buttonPressed = 0;
+extern Controls controls;
+extern ControllerType type;
 
 static USBH_StatusTypeDef USBH_HID_InterfaceInit  (USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_InterfaceDeInit  (USBH_HandleTypeDef *phost);
@@ -126,14 +76,6 @@ USBH_ClassTypeDef  HID_Class =
   USBH_HID_SOFProcess,
   NULL,
 };
-/**
-* @}
-*/ 
-
-
-/** @defgroup USBH_HID_CORE_Private_Functions
-* @{
-*/ 
 
 
 /**
@@ -172,7 +114,8 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
     if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_KEYBRD_BOOT_CODE)
     {
       USBH_UsrLog ("KeyBoard device found!"); 
-      HID_Handle->Init =  USBH_HID_KeybdInit;     
+      HID_Handle->Init =  USBH_HID_KeybdInit;
+      type = CONTROLLER_KB;
     }
     else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol  == HID_MOUSE_BOOT_CODE)		  
     {
@@ -183,6 +126,7 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
 	{
 	  USBH_UsrLog ("DS3 device found!");
 	  HID_Handle->Init =  USBH_HID_DS3Init;
+	  type = CONTROLLER_DS3;
 	}
     else
     {
@@ -282,6 +226,8 @@ USBH_StatusTypeDef USBH_HID_InterfaceDeInit (USBH_HandleTypeDef *phost )
   {
     USBH_free (phost->pActiveClass->pData);
   }
+
+  type = CONTROLLER_NONE;
 
   return USBH_OK;
 }

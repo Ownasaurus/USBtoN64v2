@@ -37,32 +37,6 @@
 #include "usbh_core.h"
 
 #define USB_XPAD_CLASS                                   0xFF
-/** @addtogroup USBH_LIB
-* @{
-*/
-
-/** @addtogroup USBH_CLASS
-* @{
-*/
-
-/** @addtogroup USBH_TEMPLATE_CLASS
-* @{
-*/
-
-/** @defgroup USBH_TEMPLATE_CLASS
-* @brief This file is the Header file for usbh_template.c
-* @{
-*/ 
-
-
-/**
-  * @}
-  */ 
-
-/** @defgroup USBH_TEMPLATE_CLASS_Exported_Types
-* @{
-*/
-
 
  typedef enum {
 	 LED_OFF    = 0x00,
@@ -81,29 +55,29 @@
  XPAD_LED;
 
  typedef enum {
-         XPAD_HAT_UP    = 0x0001,
-         XPAD_HAT_DOWN  = 0x0002,
-         XPAD_HAT_LEFT  = 0x0004,
-         XPAD_HAT_RIGHT = 0x0008,
-         XPAD_START     = 0x0010,
-         XPAD_BACK      = 0x0020,
-         XPAD_STICK_L   = 0x0040,
-         XPAD_STICK_R   = 0x0080,
-         XPAD_PAD_LB    = 0x0100,
-         XPAD_PAD_RB    = 0x0200,
-         XPAD_XLOGO     = 0x0400,
-         XPAD_PAD_A     = 0x1000,
-         XPAD_PAD_B     = 0x2000,
-         XPAD_PAD_X     = 0x4000,
-         XPAD_PAD_Y     = 0x8000,
-         XPAD_BUTTONS   = 0x10000,
-         XPAD_STICK_LX,
-         XPAD_STICK_LY,
-         XPAD_STICK_RX,
-         XPAD_STICK_RY,
-         XPAD_TRIGGER_L,
-         XPAD_TRIGGER_R,
-         XPAD_BATTERY,
+	 XPAD_HAT_UP    = 0x0001,
+	 XPAD_HAT_DOWN  = 0x0002,
+	 XPAD_HAT_LEFT  = 0x0004,
+	 XPAD_HAT_RIGHT = 0x0008,
+	 XPAD_START     = 0x0010,
+	 XPAD_BACK      = 0x0020,
+	 XPAD_STICK_L   = 0x0040,
+	 XPAD_STICK_R   = 0x0080,
+	 XPAD_PAD_LB    = 0x0100,
+	 XPAD_PAD_RB    = 0x0200,
+	 XPAD_XLOGO     = 0x0400,
+	 XPAD_PAD_A     = 0x1000,
+	 XPAD_PAD_B     = 0x2000,
+	 XPAD_PAD_X     = 0x4000,
+	 XPAD_PAD_Y     = 0x8000,
+	 XPAD_BUTTONS   = 0x10000,
+	 XPAD_STICK_LX,
+	 XPAD_STICK_LY,
+	 XPAD_STICK_RX,
+	 XPAD_STICK_RY,
+	 XPAD_TRIGGER_L,
+	 XPAD_TRIGGER_R,
+	 XPAD_BATTERY,
  }
  XPAD_PAD;
 
@@ -142,68 +116,18 @@
  }
  XPAD_HandleTypeDef;
 
+ uint8_t report[32];
+ uint32_t buttons;
+ int16_t stick_lx, stick_ly, stick_rx, stick_ry;
+ uint8_t trigger_l, trigger_r;
 
-
-
-/* States for TEMPLATE State Machine */
-
-
-/**
-* @}
-*/ 
-
-/** @defgroup USBH_TEMPLATE_CLASS_Exported_Defines
-* @{
-*/ 
-
-/**
-* @}
-*/ 
-
-/** @defgroup USBH_TEMPLATE_CLASS_Exported_Macros
-* @{
-*/ 
-/**
-* @}
-*/ 
-
-/** @defgroup USBH_TEMPLATE_CLASS_Exported_Variables
-* @{
-*/ 
 extern USBH_ClassTypeDef  XPAD_Class;
 #define USBH_XPAD_CLASS    &XPAD_Class
 
-/**
-* @}
-*/ 
-
-/** @defgroup USBH_TEMPLATE_CLASS_Exported_FunctionsPrototype
-* @{
-*/ 
-/**
-* @}
-*/ 
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* __USBH_TEMPLATE_H */
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
-/************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
 

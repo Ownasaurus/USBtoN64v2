@@ -1,5 +1,11 @@
+//TODO: FIX WIRELESS X360? random dropped inputs
+//TODO: finish customizing controls on the fly for DS3 and KB
+
 // Ownasaurus
 // rawr
+
+// A8 is n64 data
+// C6 is debug pin
 /**
   ******************************************************************************
   * @file           : main.c
@@ -50,6 +56,8 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "stm32f4xx_hal.h"
+#include "stm32f4xx_hal_flash.h"
+#include "stm32f4xx_hal_flash_ex.h"
 #include "usb_host.h"
 
 /* USER CODE BEGIN Includes */
@@ -60,6 +68,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 UART_HandleTypeDef huart2;
+uint8_t state = NORMAL;
+#define SAVE_ADDR 0x08010000 // sector 4
+Controls controls;
+Controls* saveData = (Controls*)SAVE_ADDR;
+uint8_t blueButtonPressed = 0;
+ControllerType type = CONTROLLER_NONE;
 
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
@@ -79,6 +93,115 @@ void my_wait_us_asm(int n);
 /* USER CODE END PFP */
 
 /* USER CODE BEGIN 0 */
+
+void ChangeButtonMapping(uint64_t bt)
+{
+    // analog settings must be hardcoded, cannot change on the fly
+
+    if(state == DPAD_UP) // state = 1 --> dpad up
+    {
+    	controls.XpadControls.up = bt;
+    }
+    else if(state == DPAD_DOWN) // state = 2 --> dpad down
+    {
+    	controls.XpadControls.down = bt;
+    }
+    else if(state == DPAD_LEFT) // state = 3 --> dpad left
+    {
+        controls.XpadControls.left = bt;
+    }
+    else if(state == DPAD_RIGHT) // state = 4 --> dpad right
+    {
+        controls.XpadControls.right = bt;
+    }
+    else if(state == BUTTON_START) // state = 5 --> start
+    {
+        controls.XpadControls.start = bt;
+    }
+    else if(state == BUTTON_B) // state = 6 --> B
+    {
+        controls.XpadControls.b = bt;
+    }
+    else if(state == BUTTON_A) // state = 7 --> A
+    {
+        controls.XpadControls.a = bt;
+    }
+    else if(state == C_UP) // state = 8 --> c up
+    {
+        controls.XpadControls.c_up = bt;
+    }
+    else if(state == C_DOWN) // state = 9 --> c down
+    {
+        controls.XpadControls.c_down = bt;
+    }
+    else if(state == C_LEFT) // state = 10 --> c left
+    {
+        controls.XpadControls.c_left = bt;
+    }
+    else if(state == C_RIGHT) // state = 11 --> c right
+    {
+        controls.XpadControls.c_right = bt;
+    }
+    else if(state == BUTTON_L) // state = 12 --> L
+    {
+        controls.XpadControls.l = bt;
+    }
+    else if(state == BUTTON_R) // state = 13 --> R
+    {
+        controls.XpadControls.r = bt;
+    }
+    else if(state == BUTTON_Z) // state = 14 --> Z
+    {
+        controls.XpadControls.z = bt;
+    }
+}
+
+void SaveControls()
+{
+	HAL_FLASH_Unlock(); //unlock flash writing
+	__HAL_FLASH_CLEAR_FLAG(FLASH_FLAG_EOP | FLASH_FLAG_OPERR | FLASH_FLAG_WRPERR |
+                  FLASH_FLAG_PGAERR | FLASH_FLAG_PGPERR|FLASH_FLAG_PGSERR);
+	FLASH_EraseInitTypeDef EraseInitStruct;
+	EraseInitStruct.Sector = FLASH_SECTOR_4;
+	EraseInitStruct.TypeErase = TYPEERASE_SECTORS;
+	EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+	EraseInitStruct.NbSectors = 1;
+	uint32_t SectorError = 0;
+	if (HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError) != HAL_OK) {
+	    HAL_FLASH_Lock();
+	    return;
+	}
+
+    uint32_t* data = (uint32_t*)&controls;
+
+    // Total size is 112 bytes + 18 bytes = 130 bytes
+    // Each word is 4 bytes, so the total size is 32 Words + 1 HalfWord
+    // Note: ProgramDoubleWord requires a higher voltage, so we must do one word at a time
+    for(int ct = 0;ct < 32;ct++)
+    {
+    	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,SAVE_ADDR+(ct*4),*data); //each SAVE_ADDR+4 is 4 bytes because it is a memory address
+        data++; // each data+1 is 4 bytes because it is a 32 bit data type
+    }
+    HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD,SAVE_ADDR+128,*data);
+
+    HAL_FLASH_Lock(); // lock it back up
+}
+
+void LoadControls()
+{
+    memcpy(&controls,saveData,sizeof(Controls));
+}
+
+void AdvanceState()
+{
+    state++;
+    if(state >= 19) // we're done mapping the controls
+    {
+        SaveControls(); // write directly to flash
+        state = NORMAL; // back to normal controller operation
+        //GPIOA->BSRR = (1 << 21); // LED OFF
+    }
+}
 
 uint8_t reverse(uint8_t b)
 {
@@ -172,18 +295,31 @@ void SendControllerData()
 
 // 0 is 3 microseconds low followed by 1 microsecond high
 // 1 is 1 microsecond low followed by 3 microseconds high
-unsigned int GetMiddleOfPulse()
+// if either of these while loops is going on 4us or more, break out of the function
+
+uint8_t GetMiddleOfPulse()
 {
+	uint8_t ct = 0;
     // wait for line to go high
     while(1)
     {
         if(GPIOA->IDR & 0x0100) break;
+
+        ct++;
+        if(ct == 150) // failsafe limit TBD
+        	return 5; // error code
     }
+
+    ct = 0;
 
     // wait for line to go low
     while(1)
     {
         if(!(GPIOA->IDR & 0x0100)) break;
+
+        ct++;
+		if(ct == 150) // failsafe limit TBD
+			return 5; // error code
     }
 
     // now we have the falling edge
@@ -195,9 +331,9 @@ unsigned int GetMiddleOfPulse()
 }
 
 // continuously read bits until at least 9 are read, confirm valid command, return without stop bit
-unsigned int readCommand()
+uint8_t readCommand()
 {
-	// TODO: why does the interrupt sometimes come 1.5 us after falling edge? normally only 0.3us
+	uint8_t retVal;
 
 	// we are already at the first falling edge
 	// get middle of first pulse, 2us later
@@ -207,7 +343,10 @@ unsigned int readCommand()
     while(1) // read at least 9 bits (2 bytes + stop bit)
     {
         command = command << 1; // make room for the new bit
-        command += GetMiddleOfPulse();
+        retVal = GetMiddleOfPulse();
+        if(retVal == 5) // timeout
+        	return retVal;
+        command += retVal;
 
         bits_read++;
 
@@ -231,6 +370,7 @@ int main(void)
   /* USER CODE BEGIN 1 */
 
   memset(&n64_data,0,4); // clear controller state
+  LoadControls();
 
   /* USER CODE END 1 */
 
@@ -264,7 +404,61 @@ int main(void)
   {
 
   /* USER CODE END WHILE */
-    MX_USB_HOST_Process();
+	// check for button pressed to begin control re-map
+
+	  if(state == NORMAL)
+	  {
+		  if(!(GPIOC->IDR & 0x2000)) // user wants to change controls
+		  {
+			  if(blueButtonPressed == 0) // make sure it's a separate button press
+			  {
+
+				  if(type == CONTROLLER_KB)
+					  state = 1;
+				  else if(type != CONTROLLER_NONE)
+					  state = 5;
+
+				  if(type != CONTROLLER_NONE)
+				  {
+					  // enter programming mode
+					  GPIOA->BSRR = (1 << 5); // LED ON
+					  blueButtonPressed = 1;
+					  continue;
+				  }
+			  }
+		  }
+		  else
+		  {
+			  blueButtonPressed = 0;
+		  }
+
+		  MX_USB_HOST_Process();
+	  }
+	  else
+	  {
+		  if(!(GPIOC->IDR & 0x2000)) // user wants to cancel and return to regular mode
+		  {
+			  if(blueButtonPressed == 0) // make sure it's a separate button press
+			  {
+				  GPIOA->BSRR = (1 << 21); // LED OFF
+				  blueButtonPressed = 1;
+				  state = NORMAL;
+				  continue;
+			  }
+		  }
+		  else
+		  {
+			  blueButtonPressed = 0;
+		  }
+
+		  MX_USB_HOST_Process();
+
+		  if(state == NORMAL) // about to return to normal operation, make sure the LED turns off
+		  {
+			  GPIOA->BSRR = (1 << 21); // LED OFF
+			  blueButtonPressed = 0;
+		  }
+	  }
 
   /* USER CODE BEGIN 3 */
 
@@ -339,67 +533,6 @@ void SystemClock_Config(void) // 168 MHz
   //HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
   HAL_NVIC_SetPriority(SysTick_IRQn, 1, 0);
 }
-//void SystemClock_Config(void) // 72 MHz
-//{
-//
-//  RCC_OscInitTypeDef RCC_OscInitStruct;
-//  RCC_ClkInitTypeDef RCC_ClkInitStruct;
-//  RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
-//
-//    /**Configure the main internal regulator output voltage
-//    */
-//  __HAL_RCC_PWR_CLK_ENABLE();
-//
-//  __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE3);
-//
-//    /**Initializes the CPU, AHB and APB busses clocks
-//    */
-//  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-//  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
-//  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
-//  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
-//  RCC_OscInitStruct.PLL.PLLM = 4;
-//  RCC_OscInitStruct.PLL.PLLN = 72;
-//  RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-//  RCC_OscInitStruct.PLL.PLLQ = 3;
-//  RCC_OscInitStruct.PLL.PLLR = 2;
-//  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-//
-//    /**Initializes the CPU, AHB and APB busses clocks
-//    */
-//  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-//                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
-//  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
-//  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
-//  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
-//  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV2;
-//
-//  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-//
-//  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_CLK48;
-//  PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLQ;
-//  if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
-//  {
-//    _Error_Handler(__FILE__, __LINE__);
-//  }
-//
-//    /**Configure the Systick interrupt time
-//    */
-//  HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
-//
-//    /**Configure the Systick
-//    */
-//  HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
-//
-//  /* SysTick_IRQn interrupt configuration */
-//  HAL_NVIC_SetPriority(SysTick_IRQn, 0, 0);
-//}
 
 /* USART2 init function */
 static void MX_USART2_UART_Init(void)

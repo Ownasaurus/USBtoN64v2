@@ -85,6 +85,16 @@
 /* #define USE_FULL_ASSERT    1U */
 
 /* USER CODE BEGIN Private defines */
+
+typedef enum
+ {
+   CONTROLLER_NONE = 0,
+   CONTROLLER_XPAD,
+   CONTROLLER_DS3,
+   CONTROLLER_KB
+ }
+ ControllerType;
+
 typedef struct __attribute__((packed))
 {
     unsigned int a : 1; // 1 bit wide
@@ -110,6 +120,79 @@ typedef struct __attribute__((packed))
     char y_axis;
 
 } N64ControllerData; // all bits are in the correct order... except for the analog
+
+typedef enum
+{
+	NORMAL=0,
+	A_UP,
+	A_DOWN,
+	A_LEFT,
+	A_RIGHT,
+	DPAD_UP,
+	DPAD_DOWN,
+	DPAD_LEFT,
+	DPAD_RIGHT,
+	BUTTON_START,
+	BUTTON_B,
+	BUTTON_A,
+	C_UP,
+	C_DOWN,
+	C_LEFT,
+	C_RIGHT,
+	BUTTON_L,
+	BUTTON_R,
+	BUTTON_Z
+}
+STATE;
+
+typedef struct __attribute__((packed))
+{
+	struct __attribute__((packed))
+	{
+		uint64_t a;
+		uint64_t b;
+		uint64_t z;
+		uint64_t start;
+		uint64_t up;
+		uint64_t down;
+		uint64_t left;
+		uint64_t right;
+		uint64_t l;
+		uint64_t r;
+		uint64_t c_up;
+		uint64_t c_down;
+		uint64_t c_left;
+		uint64_t c_right;
+
+	} XpadControls;
+
+	struct __attribute__((packed))
+	{
+		uint8_t KEYBOARD_a;
+		uint8_t KEYBOARD_b;
+		uint8_t KEYBOARD_z;
+		uint8_t KEYBOARD_start;
+
+		uint8_t KEYBOARD_d_up;
+		uint8_t KEYBOARD_d_down;
+		uint8_t KEYBOARD_d_left;
+		uint8_t KEYBOARD_d_right;
+
+		uint8_t KEYBOARD_l;
+		uint8_t KEYBOARD_r;
+		uint8_t KEYBOARD_c_up;
+		uint8_t KEYBOARD_c_down;
+
+		uint8_t KEYBOARD_c_left;
+		uint8_t KEYBOARD_c_right;
+		uint8_t KEYBOARD_a_up;
+		uint8_t KEYBOARD_a_down;
+
+		uint8_t KEYBOARD_a_left;
+		uint8_t KEYBOARD_a_right;
+	} KBControls;
+}
+Controls;
 
 uint8_t reverse(uint8_t b);
 /* USER CODE END Private defines */
