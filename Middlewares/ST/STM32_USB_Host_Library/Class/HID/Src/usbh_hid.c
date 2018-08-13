@@ -45,13 +45,13 @@
 extern N64ControllerData n64_data;
 
 //uint8_t ledpattern[7] = {0x02, 0x04, 0x08, 0x10, 0x12, 0x14, 0x18 };
-static uint8_t led_buffer[] = {  0x00, 0x00, 0x00, 0x00, 0xFF, 0x80, 0x00, 0x00,
+static uint8_t led_buffer[48] = {  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 							  0x02, /* LED_1 = 0x02, LED_2 = 0x04, ... */
 							  0xff, 0x27, 0x10, 0x00, 0x32,
 							  0xff, 0x27, 0x10, 0x00, 0x32,
 							  0xff, 0x27, 0x10, 0x00, 0x32,
 							  0xff, 0x27, 0x10, 0x00, 0x32,// 29 bytes
-							  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // 48 bytes
+							  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // 48 bytes
 
 extern uint8_t state;
 uint8_t keyboardButtonPressed = 0;
@@ -301,19 +301,15 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
     break;
     
   case HID_PS3_BOOTCODE:
-	  if(USBH_HID_SetReport(phost,0x03,0xF4,enable,4) == USBH_OK)
+	  if(USBH_HID_SetReport(phost,0x03,0xF4,enable,4) == USBH_OK)  // enable ps3 communication
 	  {
 		  HID_Handle->ctl_state = HID_PS3_LED;
-		  //status = USBH_OK;
 	  }
 	  break;
   case HID_PS3_LED:
-	  status = USBH_HID_SetReport(phost,0x02,0x01,led_buffer,sizeof(led_buffer));
-  	  if(status == USBH_OK)
+  	  if(USBH_HID_SetReport(phost,0x02,0x01,led_buffer,48) == USBH_OK)  // turn on p1 LED
   	  {
-  		  HID_Handle->ctl_state = HID_REQ_IDLE; // enable ps3 communication
-
-  		  status = USBH_OK;
+  		  HID_Handle->ctl_state = HID_REQ_IDLE; // move on to normal input processing
   	  }
   	  break;
 

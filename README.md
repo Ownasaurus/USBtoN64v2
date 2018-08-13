@@ -1,5 +1,5 @@
 # USBtoN64v2
-Currently in pre-alpha testing phase
+Currently in beta testing phase
 Utilizes Nucleo-F446RE board with custom header for usb and n64 communication
 
 Currently supported USB devices:
