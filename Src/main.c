@@ -1,5 +1,4 @@
 //TODO: FIX WIRELESS X360? random dropped inputs
-//TODO: ready to test customizing controls on the fly for DS3. test slightly modified analog code
 
 // Ownasaurus
 // rawr
@@ -174,59 +173,59 @@ void ChangeButtonMappingController(uint64_t bt)
 {
     // analog settings must be hardcoded, cannot change on the fly
 
-    if(state == DPAD_UP) // state = 1 --> dpad up
+    if(state == DPAD_UP) // state = 5 --> dpad up
     {
     	controls.XpadControls.up = bt;
     }
-    else if(state == DPAD_DOWN) // state = 2 --> dpad down
+    else if(state == DPAD_DOWN) // state = 6 --> dpad down
     {
     	controls.XpadControls.down = bt;
     }
-    else if(state == DPAD_LEFT) // state = 3 --> dpad left
+    else if(state == DPAD_LEFT) // state = 7 --> dpad left
     {
         controls.XpadControls.left = bt;
     }
-    else if(state == DPAD_RIGHT) // state = 4 --> dpad right
+    else if(state == DPAD_RIGHT) // state = 8 --> dpad right
     {
         controls.XpadControls.right = bt;
     }
-    else if(state == BUTTON_START) // state = 5 --> start
+    else if(state == BUTTON_START) // state = 9 --> start
     {
         controls.XpadControls.start = bt;
     }
-    else if(state == BUTTON_B) // state = 6 --> B
+    else if(state == BUTTON_B) // state = 10 --> B
     {
         controls.XpadControls.b = bt;
     }
-    else if(state == BUTTON_A) // state = 7 --> A
+    else if(state == BUTTON_A) // state = 11 --> A
     {
         controls.XpadControls.a = bt;
     }
-    else if(state == C_UP) // state = 8 --> c up
+    else if(state == C_UP) // state = 12 --> c up
     {
         controls.XpadControls.c_up = bt;
     }
-    else if(state == C_DOWN) // state = 9 --> c down
+    else if(state == C_DOWN) // state = 13 --> c down
     {
         controls.XpadControls.c_down = bt;
     }
-    else if(state == C_LEFT) // state = 10 --> c left
+    else if(state == C_LEFT) // state = 14 --> c left
     {
         controls.XpadControls.c_left = bt;
     }
-    else if(state == C_RIGHT) // state = 11 --> c right
+    else if(state == C_RIGHT) // state = 15 --> c right
     {
         controls.XpadControls.c_right = bt;
     }
-    else if(state == BUTTON_L) // state = 12 --> L
+    else if(state == BUTTON_L) // state = 16 --> L
     {
         controls.XpadControls.l = bt;
     }
-    else if(state == BUTTON_R) // state = 13 --> R
+    else if(state == BUTTON_R) // state = 17 --> R
     {
         controls.XpadControls.r = bt;
     }
-    else if(state == BUTTON_Z) // state = 14 --> Z
+    else if(state == BUTTON_Z) // state = 18 --> Z
     {
         controls.XpadControls.z = bt;
     }

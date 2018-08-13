@@ -894,7 +894,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						new_data.z = 1;
 						continue;
 					}
-					if(kb_state->keys[index] == KEY_ENTER)
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_start)
 					{
 						new_data.start = 1;
 						continue;

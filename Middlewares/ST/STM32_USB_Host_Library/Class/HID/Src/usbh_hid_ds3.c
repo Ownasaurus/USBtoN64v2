@@ -75,9 +75,9 @@ HID_DS3_Info_TypeDef *USBH_HID_GetDS3Info(USBH_HandleTypeDef *phost)
 // bit order  ds3: many 0s|r2|l2|triangle|square|circle|X|?|?|R1|L1|R3|L3|select|start|dright|dleft|ddown|dup
 uint64_t USBH_HID_GetDS3ButtonsAndTriggers()
 {
-	return ds3_data.d_up & (ds3_data.d_down << 1) & (ds3_data.d_left << 2) & (ds3_data.d_right << 3) &
-			(ds3_data.start << 4) & (ds3_data.select << 5) & (ds3_data.L3 << 6) & (ds3_data.R3 << 7) &
-			(ds3_data.L1 << 8) & (ds3_data.R1 << 9) & // next two bits unused
-			(ds3_data.x << 12) & (ds3_data.circle << 13) & (ds3_data.square << 14) & (ds3_data.triangle << 15) &
-			(ds3_data.L2 << 16) & (ds3_data.R2 << 17);
+	return ds3_data.d_up | (ds3_data.d_down << 1) | (ds3_data.d_left << 2) | (ds3_data.d_right << 3) |
+			(ds3_data.start << 4) | (ds3_data.select << 5) | (ds3_data.L3 << 6) | (ds3_data.R3 << 7) |
+			(ds3_data.L1 << 8) | (ds3_data.R1 << 9) | // next two bits unused
+			(ds3_data.x << 12) | (ds3_data.circle << 13) | (ds3_data.square << 14) | (ds3_data.triangle << 15) |
+			(ds3_data.L2 << 16) | (ds3_data.R2 << 17);
 }

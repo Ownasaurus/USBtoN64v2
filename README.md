@@ -14,18 +14,17 @@ Setting the controls:
 2) Press the buttons in the following order depending on which device is plugged in (please see below)
 3) (optional) Press the blue button again at any time to exit “set controls” mode early if you make a mistake.
 
-Xbox:
+Xbox / PS3:
 DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, BUTTON_START, BUTTON_B, BUTTON_A, C_UP, C_DOWN, C_LEFT, C_RIGHT, BUTTON_L, BUTTON_R, BUTTON_Z
 KB:
 A_UP, A_DOWN, A_LEFT, A_RIGHT, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, BUTTON_START, BUTTON_B, BUTTON_A, C_UP, C_DOWN, C_LEFT, C_RIGHT, BUTTON_L, BUTTON_R, BUTTON_Z
 
-Note that the device saves the controls even when the device is powered off. It saves the Xbox and Keyboard controls separately so they do not override each other.
+Note that the device saves the controls even when the device is powered off. It saves the Xbox and PS3 controls together as a shared layout and the Keyboard controls separately.
 
 Currently known bugs
 - Wireless X360 drops inputs
 
 TODO:
-- allow on-the-fly changing of controls for Playstation Dualshock 3 Sixaxis
 - invent a way to change deadzone/sensitivity on-the-fly without changing the code
 - fix bugs
 
