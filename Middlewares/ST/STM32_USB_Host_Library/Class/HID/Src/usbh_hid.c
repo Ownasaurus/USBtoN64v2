@@ -54,9 +54,12 @@ static uint8_t led_buffer[] = {  0x00, 0x00, 0x00, 0x00, 0xFF, 0x80, 0x00, 0x00,
 							  0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}; // 48 bytes
 
 extern uint8_t state;
-uint8_t buttonPressed = 0;
+uint8_t keyboardButtonPressed = 0;
 extern Controls controls;
 extern ControllerType type;
+
+void ChangeButtonMappingKB(uint8_t bt);
+void AdvanceState();
 
 static USBH_StatusTypeDef USBH_HID_InterfaceInit  (USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_InterfaceDeInit  (USBH_HandleTypeDef *phost);
@@ -796,72 +799,130 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 		case HID_KEYBOARD:
 			kb_state = USBH_HID_GetKeybdInfo(phost);
 
-			memset(&new_data,0,4);
+			// the buttons all become 1 if overflow, i think.  or in short, [2] == [3] == 1
+			if(kb_state->keys[2] == kb_state->keys[3] && kb_state->keys[2] == 1)
+				return;
 
-			for(int index = 0;index < 6;index++)
+			if(state == NORMAL) //used to check state variable for changing controls
 			{
-				if(kb_state->keys[index] == KEY_A)
+				memset(&new_data,0,4);
+
+				for(int index = 0;index < 6;index++)
 				{
-					new_data.a = 1;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_S)
-				{
-					new_data.b = 1;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_D)
-				{
-					new_data.z = 1;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_F)
-				{
-					new_data.r = 1;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_W)
-				{
-					new_data.c_up = 1;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_1_EXCLAMATION_MARK)
-				{
-					new_data.l = 1;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_ENTER)
-				{
-					new_data.start = 1;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_UPARROW)
-				{
-					new_data.y_axis = 0x26;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_DOWNARROW)
-				{
-					new_data.y_axis = 0x39;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_LEFTARROW)
-				{
-					new_data.x_axis = 0x39;
-					continue;
-				}
-				if(kb_state->keys[index] == KEY_RIGHTARROW)
-				{
-					new_data.x_axis = 0x26;
-					continue;
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_up)
+					{
+						new_data.y_axis = 0xFE; // -128 bit reversed (100% range)
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_down)
+					{
+						new_data.y_axis = 0x01; // +127 bit reversed (100% range)
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_left)
+					{
+						new_data.x_axis = 0x01; // +127 bit reversed (100% range)
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_right)
+					{
+						new_data.x_axis = 0xFE; // -128 bit reversed (100% range)
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_up)
+					{
+						new_data.up = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_down)
+					{
+						new_data.down = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_left)
+					{
+						new_data.left = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_right)
+					{
+						new_data.right = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a)
+					{
+						new_data.a = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_b)
+					{
+						new_data.b = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_l)
+					{
+						new_data.l = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_r)
+					{
+						new_data.r = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_z)
+					{
+						new_data.z = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == KEY_ENTER)
+					{
+						new_data.start = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_up)
+					{
+						new_data.c_up = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_down)
+					{
+						new_data.c_down = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_left)
+					{
+						new_data.c_left = 1;
+						continue;
+					}
+					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_right)
+					{
+						new_data.c_right = 1;
+						continue;
+					}
 				}
 
+				// atomic update of n64 state
+				__disable_irq();
+				memcpy(&n64_data, &new_data,4);
+				__enable_irq();
 			}
-
-			// atomic update of n64 state
-			__disable_irq();
-			memcpy(&n64_data, &new_data,4);
-			__enable_irq();
+			else
+			{
+				uint8_t b = kb_state->keys[0]; // read for button presses (just take first pressed if many are pressed)
+				if(b != 0) /*button was actually is pressed*/
+				{
+					if(keyboardButtonPressed == 0)
+					{
+						keyboardButtonPressed = 1;
+						ChangeButtonMappingKB(b);
+						AdvanceState();
+					}
+				}
+				else
+				{
+					keyboardButtonPressed = 0;
+				}
+			}
 			break;
 		case HID_DS3:
 			ds3_state = USBH_HID_GetDS3Info(phost);

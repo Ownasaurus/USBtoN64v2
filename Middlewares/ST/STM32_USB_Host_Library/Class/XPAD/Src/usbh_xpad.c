@@ -81,7 +81,7 @@ static USBH_StatusTypeDef USBH_XPAD_SOFProcess (USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_XPAD_Start(USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_XPAD_Led(USBH_HandleTypeDef *phost,XPAD_LED cmd);
 
-void ChangeButtonMapping(uint64_t bt);
+void ChangeButtonMappingController(uint64_t bt);
 void AdvanceState();
 
 USBH_ClassTypeDef  XPAD_Class =
@@ -314,7 +314,7 @@ void parseMessage(USBH_HandleTypeDef *phost)
     		if(xpadButtonPressed == 0)
     		{
     			xpadButtonPressed = 1;
-    			ChangeButtonMapping(b);
+    			ChangeButtonMappingController(b);
     			AdvanceState();
     		}
     	}

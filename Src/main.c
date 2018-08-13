@@ -1,4 +1,5 @@
 //TODO: FIX WIRELESS X360? random dropped inputs
+//TODO: fix xbone triggers overflowing
 //TODO: finish customizing controls on the fly for DS3 and KB
 
 // Ownasaurus
@@ -94,7 +95,83 @@ void my_wait_us_asm(int n);
 
 /* USER CODE BEGIN 0 */
 
-void ChangeButtonMapping(uint64_t bt)
+void ChangeButtonMappingKB(uint8_t bt)
+{
+    if(state == A_UP) // state = 1 --> analog up
+    {
+        controls.KBControls.KEYBOARD_a_up = bt;
+    }
+    else if(state == A_DOWN) // state = 2 --> analog up
+    {
+        controls.KBControls.KEYBOARD_a_down = bt;
+    }
+    else if(state == A_LEFT) // state = 3 --> analog up
+    {
+        controls.KBControls.KEYBOARD_a_left = bt;
+    }
+    else if(state == A_RIGHT) // state = 4 --> analog up
+    {
+        controls.KBControls.KEYBOARD_a_right = bt;
+    }
+    else if(state == DPAD_UP) // state = 5 --> dpad up
+    {
+        controls.KBControls.KEYBOARD_d_up = bt;
+    }
+    else if(state == DPAD_DOWN) // state = 6 --> dpad down
+    {
+        controls.KBControls.KEYBOARD_d_down = bt;
+    }
+    else if(state == DPAD_LEFT) // state = 7 --> dpad left
+    {
+        controls.KBControls.KEYBOARD_d_left = bt;
+    }
+    else if(state == DPAD_RIGHT) // state = 8 --> dpad right
+    {
+        controls.KBControls.KEYBOARD_d_right = bt;
+    }
+    else if(state == BUTTON_START) // state = 9 --> start
+    {
+        controls.KBControls.KEYBOARD_start = bt;
+    }
+    else if(state == BUTTON_B) // state = 10 --> B
+    {
+        controls.KBControls.KEYBOARD_b = bt;
+    }
+    else if(state == BUTTON_A) // state = 11 --> A
+    {
+        controls.KBControls.KEYBOARD_a = bt;
+    }
+    else if(state == C_UP) // state = 12 --> c up
+    {
+        controls.KBControls.KEYBOARD_c_up = bt;
+    }
+    else if(state == C_DOWN) // state = 13 --> c down
+    {
+        controls.KBControls.KEYBOARD_c_down = bt;
+    }
+    else if(state == C_LEFT) // state = 14 --> c left
+    {
+        controls.KBControls.KEYBOARD_c_left = bt;
+    }
+    else if(state == C_RIGHT) // state = 15 --> c right
+    {
+        controls.KBControls.KEYBOARD_c_right = bt;
+    }
+    else if(state == BUTTON_L) // state = 16 --> L
+    {
+        controls.KBControls.KEYBOARD_l = bt;
+    }
+    else if(state == BUTTON_R) // state = 17 --> R
+    {
+        controls.KBControls.KEYBOARD_r = bt;
+    }
+    else if(state == BUTTON_Z) // state = 18 --> Z
+    {
+        controls.KBControls.KEYBOARD_z = bt;
+    }
+}
+
+void ChangeButtonMappingController(uint64_t bt)
 {
     // analog settings must be hardcoded, cannot change on the fly
 

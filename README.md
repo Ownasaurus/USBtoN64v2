@@ -13,7 +13,8 @@ Currently known bugs
 - Wireless X360 drops inputs
 
 TODO:
-- allow on-the-fly changing of controls for all devices (currently only xbox family supported)
+- allow on-the-fly changing of controls for Playstation Dualshock 3 Sixaxis
+- invent a way to change deadzone/sensitivity on-the-fly without changing the code
 - fix bugs
 
 By: Ownasaurus
