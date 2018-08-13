@@ -55,11 +55,14 @@ static uint8_t led_buffer[] = {  0x00, 0x00, 0x00, 0x00, 0xFF, 0x80, 0x00, 0x00,
 
 extern uint8_t state;
 uint8_t keyboardButtonPressed = 0;
+uint8_t ds3ButtonPressed = 0;
 extern Controls controls;
 extern ControllerType type;
 
 void ChangeButtonMappingKB(uint8_t bt);
+void ChangeButtonMappingController(uint64_t bt);
 void AdvanceState();
+uint64_t USBH_HID_GetDS3ButtonsAndTriggers();
 
 static USBH_StatusTypeDef USBH_HID_InterfaceInit  (USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_InterfaceDeInit  (USBH_HandleTypeDef *phost);
@@ -79,6 +82,23 @@ USBH_ClassTypeDef  HID_Class =
   USBH_HID_SOFProcess,
   NULL,
 };
+
+uint64_t DetectButtonDS3(uint64_t buttons_and_triggers)
+{
+	// bit smearing so all bits to the right of the first 1 are also 1
+	buttons_and_triggers |= buttons_and_triggers >> 32;
+	buttons_and_triggers |= buttons_and_triggers >> 16;
+	buttons_and_triggers |= buttons_and_triggers >> 8;
+	buttons_and_triggers |= buttons_and_triggers >> 4;
+	buttons_and_triggers |= buttons_and_triggers >> 2;
+	buttons_and_triggers |= buttons_and_triggers >> 1;
+
+	// only leave the highest 1 set
+	buttons_and_triggers ^= buttons_and_triggers >> 1;
+
+	// now it is the same as the bitmask we want to return
+	return buttons_and_triggers;
+}
 
 
 /**
@@ -926,112 +946,135 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 			break;
 		case HID_DS3:
 			ds3_state = USBH_HID_GetDS3Info(phost);
+			uint64_t buttons_and_triggers = USBH_HID_GetDS3ButtonsAndTriggers();
 
-			memset(&new_data,0,4);
+			if(state == NORMAL)
+			{
+				memset(&new_data,0,4);
 
-			if(ds3_state->x)
-			{
-				new_data.a = 1;
-			}
-			if(ds3_state->triangle)
-			{
-				new_data.c_up = 1;
-			}
-			if(ds3_state->square)
-			{
-				new_data.b = 1;
-			}
-			if(ds3_state->circle)
-			{
-				new_data.c_right = 1;
-			}
-			if(ds3_state->L1)
-			{
-				new_data.l = 1;
-			}
-			if(ds3_state->R1)
-			{
-				new_data.r = 1;
-			}
-			if(ds3_state->R2)
-			{
-				new_data.z = 1;
-			}
-			if(ds3_state->L2)
-			{
-				new_data.c_left = 1;
-			}
-			if(ds3_state->start)
-			{
-				new_data.start = 1;
-			}
-			if(ds3_state->select)
-			{
-				new_data.c_down = 1;
-			}
-			if(ds3_state->d_up)
-			{
-				new_data.up = 1;
-			}
-			if(ds3_state->d_down)
-			{
-				new_data.down = 1;
-			}
-			if(ds3_state->d_left)
-			{
-				new_data.left = 1;
-			}
-			if(ds3_state->d_right)
-			{
-				new_data.right = 1;
-			}
+				if(buttons_and_triggers & controls.XpadControls.up)
+				{
+					new_data.up = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.down)
+				{
+					new_data.down = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.left)
+				{
+					new_data.left = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.right)
+				{
+					new_data.right = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_up)
+				{
+					new_data.c_up = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_down)
+				{
+					new_data.c_down = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_left)
+				{
+					new_data.c_left = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_right)
+				{
+					new_data.c_right = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.l)
+				{
+					new_data.l = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.r)
+				{
+					new_data.r = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.z)
+				{
+					new_data.z = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.a)
+				{
+					new_data.a = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.b)
+				{
+					new_data.b = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.start)
+				{
+					new_data.start = 1;
+				}
 
-			// ----- begin nrage replication analog code -----
-			const int sensitivity = 85; // Nta Bryte
-			const int dead_zone = 15;   // Nta Bryte
-			const float DS3_MAX = 128;
-			const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
-			float deadzoneValue = (dead_zone/100.0f) * DS3_MAX;
-			float deadzoneRelation = DS3_MAX / (DS3_MAX - deadzoneValue);
+				// ----- begin nrage replication analog code -----
+				const int sensitivity = 85; // Nta Bryte
+				const int dead_zone = 15;   // Nta Bryte
+				const float DS3_MAX = 127;
+				const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
+				float deadzoneValue = (dead_zone/100.0f) * DS3_MAX;
+				float deadzoneRelation = DS3_MAX / (DS3_MAX - deadzoneValue);
 
-			int8_t LSX = 0, LSY = 0; // -128 to +127...
-			float unscaled_result = 0;
-			int8_t stick_lx = ds3_state->LAnalogX - 128;
-			int8_t stick_ly = ds3_state->LAnalogY - 128;
+				int8_t LSX = 0, LSY = 0; // -128 to +127...
+				float unscaled_result = 0;
+				int8_t stick_lx = ds3_state->LAnalogX - 128;
+				int8_t stick_ly = ds3_state->LAnalogY - 128;
 
-			if(stick_lx >= deadzoneValue) // positive = right
-			{
-				unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
-				LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
-			}
-			else if(stick_lx <= (-deadzoneValue)) // negative = left
-			{
-				stick_lx = -stick_lx; // compute as positive, then negate at the end
-				unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
-				LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
-				LSX = -LSX;
-			}
+				if(stick_lx >= deadzoneValue) // positive = right
+				{
+					unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+					LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+				}
+				else if(stick_lx <= (-deadzoneValue)) // negative = left
+				{
+					stick_lx++; // just in case it's -128 it cannot be negated. otherwise the 1 is negligible.
+					stick_lx = -stick_lx; // compute as positive, then negate at the end
+					unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+					LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+					LSX = -LSX;
+				}
 
-			if(stick_ly >= deadzoneValue) // DS3 positive = down
-			{
-				unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
-				LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
-				LSY = -LSY; // for n64 down is negative
-			}
-			else if(stick_ly <= (-deadzoneValue)) // DS3 negative = down
-			{
-				stick_ly = -stick_ly; // compute as positive
-				unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
-				LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
-			}
-			new_data.x_axis = reverse((uint8_t)LSX);
-			new_data.y_axis = reverse((uint8_t)LSY);
-			// end of analog code
+				if(stick_ly >= deadzoneValue) // DS3 positive = down
+				{
+					unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+					LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+					LSY = -LSY; // for n64 down is negative
+				}
+				else if(stick_ly <= (-deadzoneValue)) // DS3 negative = up
+				{
+					stick_lx++; // just in case it's -128 it cannot be negated. otherwise the 1 is negligible.
+					stick_ly = -stick_ly; // compute as positive
+					unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+					LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+				}
+				new_data.x_axis = reverse((uint8_t)LSX);
+				new_data.y_axis = reverse((uint8_t)LSY);
+				// end of analog code
 
-			// atomic update of n64 state
-			__disable_irq();
-			memcpy(&n64_data, &new_data,4);
-			__enable_irq();
+				// atomic update of n64 state
+				__disable_irq();
+				memcpy(&n64_data, &new_data,4);
+				__enable_irq();
+			}
+			else
+			{
+				uint64_t b = DetectButtonDS3(buttons_and_triggers); // read for button presses (just do linear search)
+				if(b != 0) /*button was actually is pressed*/
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						ChangeButtonMappingController(b);
+						AdvanceState();
+					}
+				}
+				else
+				{
+					ds3ButtonPressed = 0;
+				}
+			}
 			break;
 		default:
 			break;

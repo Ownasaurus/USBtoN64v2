@@ -1,6 +1,5 @@
 //TODO: FIX WIRELESS X360? random dropped inputs
-//TODO: fix xbone triggers overflowing
-//TODO: finish customizing controls on the fly for DS3 and KB
+//TODO: ready to test customizing controls on the fly for DS3. test slightly modified analog code
 
 // Ownasaurus
 // rawr

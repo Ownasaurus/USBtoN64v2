@@ -51,7 +51,7 @@ extern Controls controls;
 extern ControllerType type;
 
 // bit order xbox: many 0s|rt|lt|y|x|b|a|?|?|RB|LB|RAB|LAB|back|start|dright|dleft|ddown|dup
-// bit order  ds3: many 0s|r2|l2|triangle|square|circle|X|?|?|R1|L1|R3|L3|select|start|dright|dleft|ddown|dup
+
 const uint64_t   A_MASK      = 0x00001000,
 				 B_MASK      = 0x00002000,
 				 X_MASK      = 0x00004000,
@@ -170,9 +170,9 @@ void parseMessage(USBH_HandleTypeDef *phost)
         buttons |= (report[5] & 0x30) << 4; // correctly place bumpers
         buttons |= (report[5] & 0xC0); // correctly analog stick buttons
 
-        //TODO: FIX TRIGGERS, PROBABLY OVERFLOWING
-        trigger_l = ((uint32_t)report[7] << 8) | report[6]; //6 and 7
-        trigger_r = ((uint32_t)report[9] << 8) | report[8]; // 8 and 9
+
+        trigger_l = (((uint32_t)report[7] << 8) | report[6]) >> 2; // max is 1024 instead of 256, so >> 2 to divide by 4
+		trigger_r = (((uint32_t)report[9] << 8) | report[8]) >> 2; // max is 1024 instead of 256, so >> 2 to divide by 4
 
         stick_lx = ((int16_t)data[11] << 8) | data[10];
         stick_ly = ((int16_t)data[13] << 8) | data[12];
@@ -675,39 +675,10 @@ static USBH_StatusTypeDef USBH_XPAD_Process (USBH_HandleTypeDef *phost)
 	return USBH_OK;
 }
 
-
-/**
-  * @brief  USBH_XPAD_IOProcess
-  *         XPAD XPAD process
-  * @param  phost: Host handle
-  * @retval USBH Status
-  */
 static USBH_StatusTypeDef USBH_XPAD_SOFProcess (USBH_HandleTypeDef *phost)
 {
   
   return USBH_OK;
 }
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/ 
-
-/**
-* @}
-*/
-
-
-/**
-* @}
-*/
-
-
-/**
-* @}
-*/
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
