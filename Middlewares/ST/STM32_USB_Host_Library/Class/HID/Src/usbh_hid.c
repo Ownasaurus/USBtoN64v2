@@ -140,12 +140,12 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
       HID_Handle->Init =  USBH_HID_KeybdInit;
       type = CONTROLLER_KB;
     }
-    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol  == HID_MOUSE_BOOT_CODE)		  
+    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_MOUSE_BOOT_CODE)
     {
       USBH_UsrLog ("Mouse device found!");         
       HID_Handle->Init =  USBH_HID_MouseInit;     
     }
-    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol  == HID_DS3_BOOT_CODE)
+    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_DS3_BOOT_CODE)
 	{
 	  USBH_UsrLog ("DS3 device found!");
 	  HID_Handle->Init =  USBH_HID_DS3Init;
@@ -1006,9 +1006,6 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				}
 
 				// ----- begin nrage replication analog code -----
-				const int sensitivity = 85; // Nta Bryte
-				const int dead_zone = 15;   // Nta Bryte
-				const float DS3_MAX = 127;
 				const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
 				float deadzoneValue = (dead_zone/100.0f) * DS3_MAX;
 				float deadzoneRelation = DS3_MAX / (DS3_MAX - deadzoneValue);

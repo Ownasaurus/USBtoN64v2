@@ -1,5 +1,3 @@
-//TODO: FIX WIRELESS X360? random dropped inputs
-
 // Ownasaurus
 // rawr
 

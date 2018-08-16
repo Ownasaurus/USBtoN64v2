@@ -23,7 +23,7 @@ A_UP, A_DOWN, A_LEFT, A_RIGHT, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, BUTTON
 Note that the device saves the controls even when the device is powered off. It saves the Xbox and PS3 controls together as a shared layout and the Keyboard controls separately.
 
 Currently known bugs
-- Wireless X360 drops inputs
+- Cannot hot swap to DS3 directly from another controller type, but can always hit the reset button for now
 
 TODO:
 - invent a way to change deadzone/sensitivity on-the-fly without changing the code

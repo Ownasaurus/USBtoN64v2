@@ -81,6 +81,7 @@ void EXTI9_5_IRQHandler(void)
 {
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 	// Read 64 command
+	__disable_irq();
 	uint8_t cmd = readCommand();
 
 	my_wait_us_asm(2); // wait a small amount of time before replying
@@ -106,6 +107,8 @@ void EXTI9_5_IRQHandler(void)
 	//-------- DONE SENDING RESPOSE
 
 	SetN64DataInputMode();
+
+	__enable_irq();
 
   /* USER CODE END EXTI9_5_IRQn 0 */
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_8);

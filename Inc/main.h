@@ -86,6 +86,13 @@
 
 /* USER CODE BEGIN Private defines */
 
+#define tN 0.03921568627f //(10/255)
+#define dead_zone 20
+#define sensitivity 100
+#define TRIGGER_THRESHOLD 5
+#define XPAD_MAX 32767 // -32768 to +32767...
+#define DS3_MAX 127
+
 typedef enum
  {
    CONTROLLER_NONE = 0,

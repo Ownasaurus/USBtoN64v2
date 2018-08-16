@@ -37,13 +37,6 @@ uint8_t LSY=0, LSX=0, RSY=0, RSX=0, Lt=0, Rt=0;
 @brief float for storing the trigger Normalising value
 @brief makes the range of the triggers 0 to 10
 */
-const float tN=0.03921568627;//(10/255)
-/* LD
- * const uint8_t dead_zone = 20;
-const uint8_t sensitivity = 100;*/
-const uint8_t dead_zone = 7;
-const uint8_t sensitivity = 75;
-const uint8_t TRIGGER_THRESHOLD = 5;
 uint8_t serial = 0;
 extern uint8_t state;
 uint8_t xpadButtonPressed = 0;
@@ -142,8 +135,8 @@ void parseMessage(USBH_HandleTypeDef *phost)
         if (report[5]) buttons |= XPAD_PAD_B;
         if (report[6]) buttons |= XPAD_PAD_X;
         if (report[7]) buttons |= XPAD_PAD_Y;
-        trigger_l = data[10];
-        trigger_r = data[11];
+        trigger_l = report[10];
+        trigger_r = report[11];
 
         stick_lx = ((int16_t)report[13] << 8) | report[12];
         stick_ly = ((int16_t)report[15] << 8) | report[14];
@@ -262,8 +255,7 @@ void parseMessage(USBH_HandleTypeDef *phost)
 		}
 
     	// ----- begin nrage replication analog code -----
-    	const float XPAD_MAX = 32767; // -32768 to +32767...
-    	const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
+		const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
     	float deadzoneValue = (dead_zone/100.0f) * XPAD_MAX;
     	float deadzoneRelation = XPAD_MAX / (XPAD_MAX - deadzoneValue);
 
@@ -334,22 +326,18 @@ void XPAD_360_WIRELESS_ProcessInputData(USBH_HandleTypeDef *phost)
 			// Event data
 			parseMessage(phost);
 		}
-		/*else if(report[1] == 0x0F) // initial announcement message
+		else if(report[1] == 0x0f)
 		{
-			USBH_XPAD_Start(phost);
 			USBH_XPAD_Led(phost, LED1_ON);
-		}*/
+			USBH_XPAD_Start(phost);
+		}
 	}
 	else if(report[0] == 0x08)
 	{
 		 if(report[1] == 0x80)
 		 {
-			 USBH_XPAD_Led(phost, LED1_ON);
+			 //USBH_XPAD_Led(phost, LED1_ON);
 			 USBH_XPAD_Start(phost);
-		 }
-		 else if(report[1] == 0x00)
-		 {
-			 ; // disconnected
 		 }
 	}
 }
@@ -375,22 +363,10 @@ void XPAD_XBONE_ProcessInputData(USBH_HandleTypeDef *phost)
 			USBH_XPAD_Start(phost);
 		}
 	}
-	else if(report[0] == 0x03)
-	{
-		// heartbeat
-	}
-	else if(report[0] == 0x07)
-	{
-		// guide button
-	}
 	else if(report[0] == 0x20)
 	{
 		// buttons update
 		parseMessage(phost);
-	}
-	else if(report[0] == 0x01)
-	{
-		// error packet?
 	}
 }
 
@@ -473,6 +449,8 @@ static USBH_StatusTypeDef USBH_XPAD_InterfaceInit (USBH_HandleTypeDef *phost)
 	XPAD_HandleTypeDef *XPAD_Handle;
 	XPAD_TypeTypeDef ctype = XPAD_UNKNOWN;
 
+	memset(report,0,sizeof(report));
+
 	// phost, class, subclass, protocol
 	interface = USBH_FindInterface(phost, phost->pActiveClass->ClassCode, 0x5D, 0x81); // X360 wireless
 
@@ -517,10 +495,10 @@ static USBH_StatusTypeDef USBH_XPAD_InterfaceInit (USBH_HandleTypeDef *phost)
 	XPAD_Handle->poll      = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bInterval;
 	XPAD_Handle->xpad_type = ctype;
 
-	if (XPAD_Handle->poll  < 10)
+	/*if (XPAD_Handle->poll  < 10)
 	{
 		XPAD_Handle->poll = 10;
-	}
+	}*/
 
 	/* Check for available number of endpoints */
 	/* Find the number of EPs in the Interface Descriptor */
@@ -559,7 +537,7 @@ static USBH_StatusTypeDef USBH_XPAD_InterfaceInit (USBH_HandleTypeDef *phost)
 
 		/* Open pipe for OUT endpoint */
 		USBH_OpenPipe  (phost,
-				XPAD_Handle->OutPipe,
+						XPAD_Handle->OutPipe,
 						XPAD_Handle->OutEp,
 						phost->device.address,
 						phost->device.speed,
@@ -653,6 +631,7 @@ static USBH_StatusTypeDef USBH_XPAD_Process (USBH_HandleTypeDef *phost)
 			break;
 		case XPAD_IDLE:
 			USBH_InterruptReceiveData(phost,report,32,XPAD_Handle->InPipe);
+			USBH_Delay(1);
 			switch(XPAD_Handle->xpad_type)
 			{
 				case XPAD_360_WIRELESS:
