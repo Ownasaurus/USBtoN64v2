@@ -42,6 +42,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "usbh_hid.h"
 #include "usbh_hid_parser.h"
+#include "usbh_xpad.h"
 extern N64ControllerData n64_data;
 
 //uint8_t ledpattern[7] = {0x02, 0x04, 0x08, 0x10, 0x12, 0x14, 0x18 };
@@ -1006,8 +1007,8 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				}
 
 				// ----- begin nrage replication analog code -----
-				const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
-				float deadzoneValue = (dead_zone/100.0f) * DS3_MAX;
+				const float N64_MAX = 127*(controls.XpadControls.range/100.0f);
+				float deadzoneValue = (controls.XpadControls.deadzone/100.0f) * DS3_MAX;
 				float deadzoneRelation = DS3_MAX / (DS3_MAX - deadzoneValue);
 
 				int8_t LSX = 0, LSY = 0; // -128 to +127...
@@ -1050,6 +1051,102 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				__disable_irq();
 				memcpy(&n64_data, &new_data,4);
 				__enable_irq();
+			}
+			else if(state == STATE_SENSITIVITY)
+			{
+				uint64_t b = DetectButtonDS3(buttons_and_triggers); // read for button presses (just do linear search)
+				if(b == XPAD_HAT_UP) // +5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range < 95 ? controls.XpadControls.range+5 : 100;
+					}
+				}
+				else if(b == XPAD_HAT_DOWN) // -5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range > 5 ? controls.XpadControls.range-5 : 0;
+					}
+				}
+				else if(b == XPAD_HAT_LEFT) // -1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range > 1 ? controls.XpadControls.range-1 : 0;
+					}
+								}
+				else if(b == XPAD_HAT_RIGHT)// +1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range < 99 ? controls.XpadControls.range+1 : 100;
+					}
+				}
+				else if(b == XPAD_PAD_A) // OK
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						AdvanceState();
+					}
+				}
+				else
+				{
+					ds3ButtonPressed = 0;
+				}
+			}
+			else if(state == STATE_DEADZONE)
+			{
+				uint64_t b = DetectButtonDS3(buttons_and_triggers); // read for button presses (just do linear search)
+				if(b == XPAD_HAT_UP) // +5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone < 95 ? controls.XpadControls.deadzone+5 : 100;
+					}
+				}
+				else if(b == XPAD_HAT_DOWN) // -5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone > 5 ? controls.XpadControls.deadzone-5 : 0;
+					}
+				}
+				else if(b == XPAD_HAT_LEFT) // -1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone > 1 ? controls.XpadControls.deadzone-1 : 0;
+					}
+								}
+				else if(b == XPAD_HAT_RIGHT)// +1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone < 99 ? controls.XpadControls.deadzone+1 : 100;
+					}
+				}
+				else if(b == XPAD_PAD_A) // OK
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						//keep ds3ButtonPressed at 0 for next time since we're done
+						AdvanceState();
+					}
+				}
+				else
+				{
+					ds3ButtonPressed = 0;
+				}
 			}
 			else
 			{

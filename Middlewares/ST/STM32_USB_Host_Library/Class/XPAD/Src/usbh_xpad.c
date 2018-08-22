@@ -181,21 +181,21 @@ void parseMessage(USBH_HandleTypeDef *phost)
     Lt=trigger_l*tN;
     Rt=trigger_r*tN;
 
+	uint64_t buttons_and_triggers = buttons;
+
+	if(Lt > TRIGGER_THRESHOLD)
+	{
+		buttons_and_triggers |= LT_MASK;
+	}
+	if(Rt > TRIGGER_THRESHOLD)
+	{
+		buttons_and_triggers |= RT_MASK;
+	}
+
     if(state == NORMAL) //used to check state variable for changing controls
     {
     	N64ControllerData new_data;
     	memset(&new_data,0,4); // clear controller state
-
-    	uint64_t buttons_and_triggers = buttons;
-
-    	if(Lt > TRIGGER_THRESHOLD)
-    	{
-    		buttons_and_triggers |= LT_MASK;
-    	}
-    	if(Rt > TRIGGER_THRESHOLD)
-    	{
-    		buttons_and_triggers |= RT_MASK;
-    	}
 
     	if(buttons_and_triggers & controls.XpadControls.up)
 		{
@@ -255,8 +255,8 @@ void parseMessage(USBH_HandleTypeDef *phost)
 		}
 
     	// ----- begin nrage replication analog code -----
-		const float N64_MAX = (sensitivity > 0) ? 127*(sensitivity/100.0f) : 0;
-    	float deadzoneValue = (dead_zone/100.0f) * XPAD_MAX;
+		const float N64_MAX = 127*(controls.XpadControls.range/100.0f);
+    	float deadzoneValue = (controls.XpadControls.deadzone/100.0f) * XPAD_MAX;
     	float deadzoneRelation = XPAD_MAX / (XPAD_MAX - deadzoneValue);
 
     	LSX = LSY = 0; // -128 to +127...
@@ -298,6 +298,102 @@ void parseMessage(USBH_HandleTypeDef *phost)
 		memcpy(&n64_data, &new_data,4);
 		__enable_irq();
     }
+    else if(state == STATE_SENSITIVITY)
+	{
+		uint64_t b = DetectButton(buttons_and_triggers); // read for button presses (just do linear search)
+		if(b == XPAD_HAT_UP) // +5
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.range = controls.XpadControls.range < 95 ? controls.XpadControls.range+5 : 100;
+			}
+		}
+		else if(b == XPAD_HAT_DOWN) // -5
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.range = controls.XpadControls.range > 5 ? controls.XpadControls.range-5 : 0;
+			}
+		}
+		else if(b == XPAD_HAT_LEFT) // -1
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.range = controls.XpadControls.range > 1 ? controls.XpadControls.range-1 : 0;
+			}
+						}
+		else if(b == XPAD_HAT_RIGHT)// +1
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.range = controls.XpadControls.range < 99 ? controls.XpadControls.range+1 : 100;
+			}
+		}
+		else if(b == XPAD_PAD_A) // OK
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				AdvanceState();
+			}
+		}
+		else
+		{
+			xpadButtonPressed = 0;
+		}
+	}
+	else if(state == STATE_DEADZONE)
+	{
+		uint64_t b = DetectButton(buttons_and_triggers); // read for button presses (just do linear search)
+		if(b == XPAD_HAT_UP) // +5
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.deadzone = controls.XpadControls.deadzone < 95 ? controls.XpadControls.deadzone+5 : 100;
+			}
+		}
+		else if(b == XPAD_HAT_DOWN) // -5
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.deadzone = controls.XpadControls.deadzone > 5 ? controls.XpadControls.deadzone-5 : 0;
+			}
+		}
+		else if(b == XPAD_HAT_LEFT) // -1
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.deadzone = controls.XpadControls.deadzone > 1 ? controls.XpadControls.deadzone-1 : 0;
+			}
+						}
+		else if(b == XPAD_HAT_RIGHT)// +1
+		{
+			if(xpadButtonPressed == 0)
+			{
+				xpadButtonPressed = 1;
+				controls.XpadControls.deadzone = controls.XpadControls.deadzone < 99 ? controls.XpadControls.deadzone+1 : 100;
+			}
+		}
+		else if(b == XPAD_PAD_A) // OK
+		{
+			if(xpadButtonPressed == 0)
+			{
+				//keep xpadButtonPressed at 0 for next time since we're done
+				AdvanceState();
+			}
+		}
+		else
+		{
+			xpadButtonPressed = 0;
+		}
+	}
     else // state > 0 so we are in the process of changing controls
     {
     	uint64_t b = DetectButton(); // read for button presses (just do linear search)

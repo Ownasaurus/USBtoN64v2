@@ -1,6 +1,12 @@
 // Ownasaurus
 // rawr
 
+//ds3 not sending data
+//kb's repeat rate too high; possible bug
+
+// USB DFU mode for F446
+// Pattern1 Boot0(pin) = 1 and Boot1(pin) = 0
+
 // A8 is n64 data
 // C6 is debug pin
 /**
@@ -169,8 +175,6 @@ void ChangeButtonMappingKB(uint8_t bt)
 
 void ChangeButtonMappingController(uint64_t bt)
 {
-    // analog settings must be hardcoded, cannot change on the fly
-
     if(state == DPAD_UP) // state = 5 --> dpad up
     {
     	controls.XpadControls.up = bt;
@@ -247,15 +251,13 @@ void SaveControls()
 
     uint32_t* data = (uint32_t*)&controls;
 
-    // Total size is 112 bytes + 18 bytes = 130 bytes
-    // Each word is 4 bytes, so the total size is 32 Words + 1 HalfWord
-    // Note: ProgramDoubleWord requires a higher voltage, so we must do one word at a time
-    for(int ct = 0;ct < 32;ct++)
+    // Total size is 114 bytes + 18 bytes = 132 bytes
+    // Each word is 4 bytes, so the total size is 33 Words
+    for(int ct = 0;ct < 33;ct++)
     {
     	HAL_FLASH_Program(FLASH_TYPEPROGRAM_WORD,SAVE_ADDR+(ct*4),*data); //each SAVE_ADDR+4 is 4 bytes because it is a memory address
         data++; // each data+1 is 4 bytes because it is a 32 bit data type
     }
-    HAL_FLASH_Program(FLASH_TYPEPROGRAM_HALFWORD,SAVE_ADDR+128,*data);
 
     HAL_FLASH_Lock(); // lock it back up
 }
@@ -268,11 +270,18 @@ void LoadControls()
 void AdvanceState()
 {
     state++;
-    if(state >= 19) // we're done mapping the controls
+    if((state == STATE_SENSITIVITY && type == CONTROLLER_KB) || state > STATE_DEADZONE) // we're done mapping the controls
     {
-        SaveControls(); // write directly to flash
-        state = NORMAL; // back to normal controller operation
-        //GPIOA->BSRR = (1 << 21); // LED OFF
+		SaveControls(); // write directly to flash
+		state = NORMAL; // back to normal controller operation
+    }
+    else if(state == STATE_SENSITIVITY)
+    {
+    	controls.XpadControls.range = DEFAULT_RANGE;
+    }
+    else if(state == STATE_DEADZONE)
+    {
+    	controls.XpadControls.deadzone = DEFAULT_DEADZONE;
     }
 }
 

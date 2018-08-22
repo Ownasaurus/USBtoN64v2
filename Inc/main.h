@@ -87,8 +87,8 @@
 /* USER CODE BEGIN Private defines */
 
 #define tN 0.03921568627f //(10/255)
-#define dead_zone 20
-#define sensitivity 100
+#define DEFAULT_RANGE 100
+#define DEFAULT_DEADZONE 20
 #define TRIGGER_THRESHOLD 5
 #define XPAD_MAX 32767 // -32768 to +32767...
 #define DS3_MAX 127
@@ -148,7 +148,9 @@ typedef enum
 	C_RIGHT,
 	BUTTON_L,
 	BUTTON_R,
-	BUTTON_Z
+	BUTTON_Z,
+	STATE_SENSITIVITY,
+	STATE_DEADZONE
 }
 STATE;
 
@@ -170,6 +172,8 @@ typedef struct __attribute__((packed))
 		uint64_t c_down;
 		uint64_t c_left;
 		uint64_t c_right;
+		uint8_t range;
+		uint8_t deadzone;
 
 	} XpadControls;
 
