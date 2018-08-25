@@ -35,11 +35,11 @@ A_UP, A_DOWN, A_LEFT, A_RIGHT, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, BUTTON
 Note that the device saves the controls even when the device is powered off. It saves the Xbox and Playstation controls together as a shared layout and the Keyboard controls separately.
 
 Currently known bugs
-- Cannot hot swap to DS3 directly from another controller type, but can always hit the reset button for now
+- None!
 
 ## TODO:
 - implement PS4 support (currently in process by myself and Kazon Wilson [kwilson21])
-- fix bugs
+- discover and fix bugs
 
 By: Ownasaurus
 
