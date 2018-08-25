@@ -98,6 +98,7 @@ typedef enum
    CONTROLLER_NONE = 0,
    CONTROLLER_XPAD,
    CONTROLLER_DS3,
+   CONTROLLER_DS4,
    CONTROLLER_KB
  }
  ControllerType;

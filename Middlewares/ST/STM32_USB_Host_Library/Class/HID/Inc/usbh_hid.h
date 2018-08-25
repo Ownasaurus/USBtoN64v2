@@ -38,6 +38,7 @@
 #include "usbh_hid_mouse.h"
 #include "usbh_hid_keybd.h"
 #include "usbh_hid_ds3.h"
+#include "usbh_hid_ds4.h"
  
 /** @addtogroup USBH_LIB
   * @{
@@ -141,6 +142,7 @@ typedef enum
   HID_MOUSE    = 0x01,
   HID_KEYBOARD = 0x02,
   HID_DS3 = 0x03,
+  HID_DS4 = 0x04,
   HID_UNKNOWN = 0xFF,
 }
 HID_TypeTypeDef;

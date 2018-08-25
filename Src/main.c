@@ -1,7 +1,6 @@
 // Ownasaurus
 // rawr
 
-//ds3 not sending data
 //kb's repeat rate too high; possible bug
 
 // USB DFU mode for F446

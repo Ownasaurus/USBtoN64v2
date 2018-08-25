@@ -64,6 +64,7 @@ void ChangeButtonMappingKB(uint8_t bt);
 void ChangeButtonMappingController(uint64_t bt);
 void AdvanceState();
 uint64_t USBH_HID_GetDS3ButtonsAndTriggers();
+uint64_t USBH_HID_GetDS4ButtonsAndTriggers();
 
 static USBH_StatusTypeDef USBH_HID_InterfaceInit  (USBH_HandleTypeDef *phost);
 static USBH_StatusTypeDef USBH_HID_InterfaceDeInit  (USBH_HandleTypeDef *phost);
@@ -148,9 +149,19 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
     }
     else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_DS3_BOOT_CODE)
 	{
-	  USBH_UsrLog ("DS3 device found!");
-	  HID_Handle->Init =  USBH_HID_DS3Init;
-	  type = CONTROLLER_DS3;
+    	if(phost->device.DevDesc.idVendor == 0x054C && phost->device.DevDesc.idProduct == 0x0268)
+    	{
+			USBH_UsrLog ("DS3 device found!");
+			HID_Handle->Init =  USBH_HID_DS3Init;
+			type = CONTROLLER_DS3;
+    	}
+    	else if(phost->device.DevDesc.idVendor == 0x054C && \
+    			(phost->device.DevDesc.idProduct == 0x05C4/*regular*/|| phost->device.DevDesc.idProduct == 0x09CC/*slim*/))
+		{
+    		USBH_UsrLog ("DS4 device found!");
+    		HID_Handle->Init =  USBH_HID_DS4Init;
+    		type = CONTROLLER_DS4;
+		}
 	}
     else
     {
@@ -296,6 +307,13 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
     	{
     		HID_Handle->ctl_state = HID_PS3_BOOTCODE;
     	}
+    	else if(phost->device.DevDesc.idVendor == 0x054C && \
+    	    			(phost->device.DevDesc.idProduct == 0x05C4/*DS4 regular*/|| phost->device.DevDesc.idProduct == 0x09CC/*DS4 slim*/))
+    	{
+    		HID_Handle->ctl_state = HID_REQ_IDLE; // move on to normal input processing
+			phost->pUser(phost, HOST_USER_CLASS_ACTIVE);
+			status = USBH_OK;
+    	}
     	else HID_Handle->ctl_state = HID_REQ_SET_IDLE;
     }
     
@@ -310,7 +328,9 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
   case HID_PS3_LED:
   	  if(USBH_HID_SetReport(phost,0x02,0x01,led_buffer,48) == USBH_OK)  // turn on p1 LED
   	  {
-  		  HID_Handle->ctl_state = HID_REQ_IDLE; // move on to normal input processing
+			HID_Handle->ctl_state = HID_REQ_IDLE; // move on to normal input processing
+			phost->pUser(phost, HOST_USER_CLASS_ACTIVE);
+			status = USBH_OK;
   	  }
   	  break;
 
@@ -671,7 +691,15 @@ HID_TypeTypeDef USBH_HID_GetDeviceType(USBH_HandleTypeDef *phost)
     else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol \
 	  == HID_DS3_BOOT_CODE)
 	{
-	  type=  HID_DS3;
+    	if(phost->device.DevDesc.idVendor == 0x054C && phost->device.DevDesc.idProduct == 0x0268)
+		{
+			type = HID_DS3;
+		}
+		else if(phost->device.DevDesc.idVendor == 0x054C && \
+				(phost->device.DevDesc.idProduct == 0x05C4 || phost->device.DevDesc.idProduct == 0x09CC))
+		{
+			type = HID_DS4;
+		}
 	}
   }
   return type;
@@ -807,6 +835,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 	HID_TypeTypeDef type = HID_UNKNOWN;
 	HID_KEYBD_Info_TypeDef* kb_state = NULL;
 	HID_DS3_Info_TypeDef* ds3_state = NULL;
+	HID_DS4_Info_TypeDef* ds4_state = NULL;
 	N64ControllerData new_data;
 
 	type = USBH_HID_GetDeviceType(phost);
@@ -1038,7 +1067,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				}
 				else if(stick_ly <= (-deadzoneValue)) // DS3 negative = up
 				{
-					stick_lx++; // just in case it's -128 it cannot be negated. otherwise the 1 is negligible.
+					stick_ly++; // just in case it's -128 it cannot be negated. otherwise the 1 is negligible.
 					stick_ly = -stick_ly; // compute as positive
 					unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
 					LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
@@ -1165,6 +1194,11 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 					ds3ButtonPressed = 0;
 				}
 			}
+			break;
+		case HID_DS4:
+			ds4_state = USBH_HID_GetDS4Info(phost);
+			buttons_and_triggers = USBH_HID_GetDS3ButtonsAndTriggers();
+			ds4_state->LAnalogY = ds4_state->LAnalogY;
 			break;
 		default:
 			break;

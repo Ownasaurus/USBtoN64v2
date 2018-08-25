@@ -25,7 +25,7 @@ USBH_StatusTypeDef USBH_HID_DS3Init(USBH_HandleTypeDef *phost)
 	  HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData;
 
 	  memset(&ds3_data,0,sizeof(HID_DS3_Info_TypeDef));
-	  memset(ds3_report_data,0,sizeof(uint32_t)*12);
+	  memset(ds3_report_data,0,sizeof(ds3_report_data));
 
 	  if(HID_Handle->length > (sizeof(ds3_report_data)/sizeof(uint32_t)))
 	  {
