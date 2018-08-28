@@ -279,7 +279,7 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
   uint8_t enable[4] = {0x42, 0x0C, 0x00, 0x00};
   USBH_StatusTypeDef status         = USBH_BUSY;
   USBH_StatusTypeDef classReqStatus = USBH_BUSY;
-  HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData; 
+  HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData;
 
   /* Switch HID state machine */
   switch (HID_Handle->ctl_state)

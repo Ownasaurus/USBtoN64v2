@@ -1979,7 +1979,7 @@ LOAD c:/program files (x86)/atollic/truestudio for stm32 9.0.1/armtools/bin/../l
                 0x00000953       0x22 c:/program files (x86)/atollic/truestudio for stm32 9.0.1/armtools/bin/../lib/gcc/arm-atollic-eabi/6.3.1/armv7e-m/fpu/crtn.o
 OUTPUT(USBtoN64v2.elf elf32-littlearm)
 
-.debug_info     0x00000000    0x25274
+.debug_info     0x00000000    0x25273
  .debug_info    0x00000000     0x1170 Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.o
  .debug_info    0x00001170     0x1600 Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.o
  .debug_info    0x00002770      0xdc4 Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_flash.o
@@ -2001,16 +2001,16 @@ OUTPUT(USBtoN64v2.elf elf32-littlearm)
  .debug_info    0x00018b65     0x16a4 Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_ctlreq.o
  .debug_info    0x0001a209     0x1431 Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_ioreq.o
  .debug_info    0x0001b63a     0x1274 Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_pipes.o
- .debug_info    0x0001c8ae     0x260c Src\main.o
- .debug_info    0x0001eeba       0x5b Src\my_wait_us_asm.o
- .debug_info    0x0001ef15     0x1354 Src\stm32f4xx_hal_msp.o
- .debug_info    0x00020269      0xe8c Src\stm32f4xx_it.o
- .debug_info    0x000210f5      0xd4b Src\system_stm32f4xx.o
- .debug_info    0x00021e40     0x1280 Src\usb_host.o
- .debug_info    0x000230c0     0x2154 Src\usbh_conf.o
- .debug_info    0x00025214       0x60 startup\startup_stm32f446xx.o
+ .debug_info    0x0001c8ae     0x260b Src\main.o
+ .debug_info    0x0001eeb9       0x5b Src\my_wait_us_asm.o
+ .debug_info    0x0001ef14     0x1354 Src\stm32f4xx_hal_msp.o
+ .debug_info    0x00020268      0xe8c Src\stm32f4xx_it.o
+ .debug_info    0x000210f4      0xd4b Src\system_stm32f4xx.o
+ .debug_info    0x00021e3f     0x1280 Src\usb_host.o
+ .debug_info    0x000230bf     0x2154 Src\usbh_conf.o
+ .debug_info    0x00025213       0x60 startup\startup_stm32f446xx.o
 
-.debug_abbrev   0x00000000     0x4af4
+.debug_abbrev   0x00000000     0x4b03
  .debug_abbrev  0x00000000      0x280 Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal.o
  .debug_abbrev  0x00000280      0x371 Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_cortex.o
  .debug_abbrev  0x000005f1      0x2df Drivers\STM32F4xx_HAL_Driver\Src\stm32f4xx_hal_flash.o
@@ -2032,14 +2032,14 @@ OUTPUT(USBtoN64v2.elf elf32-littlearm)
  .debug_abbrev  0x00003383      0x305 Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_ctlreq.o
  .debug_abbrev  0x00003688      0x263 Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_ioreq.o
  .debug_abbrev  0x000038eb      0x29b Middlewares\ST\STM32_USB_Host_Library\Core\Src\usbh_pipes.o
- .debug_abbrev  0x00003b86      0x3f4 Src\main.o
- .debug_abbrev  0x00003f7a       0x14 Src\my_wait_us_asm.o
- .debug_abbrev  0x00003f8e      0x1f2 Src\stm32f4xx_hal_msp.o
- .debug_abbrev  0x00004180      0x200 Src\stm32f4xx_it.o
- .debug_abbrev  0x00004380      0x1ca Src\system_stm32f4xx.o
- .debug_abbrev  0x0000454a      0x261 Src\usb_host.o
- .debug_abbrev  0x000047ab      0x337 Src\usbh_conf.o
- .debug_abbrev  0x00004ae2       0x12 startup\startup_stm32f446xx.o
+ .debug_abbrev  0x00003b86      0x403 Src\main.o
+ .debug_abbrev  0x00003f89       0x14 Src\my_wait_us_asm.o
+ .debug_abbrev  0x00003f9d      0x1f2 Src\stm32f4xx_hal_msp.o
+ .debug_abbrev  0x0000418f      0x200 Src\stm32f4xx_it.o
+ .debug_abbrev  0x0000438f      0x1ca Src\system_stm32f4xx.o
+ .debug_abbrev  0x00004559      0x261 Src\usb_host.o
+ .debug_abbrev  0x000047ba      0x337 Src\usbh_conf.o
+ .debug_abbrev  0x00004af1       0x12 startup\startup_stm32f446xx.o
 
 .debug_aranges  0x00000000      0xf70
  .debug_aranges

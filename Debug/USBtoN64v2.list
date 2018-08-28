@@ -23,21 +23,21 @@ Idx Name          Size      VMA       LMA       File off  Algn
                   ALLOC
   9 .ARM.attributes 00000030  00000000  00000000  000200e4  2**0
                   CONTENTS, READONLY
- 10 .debug_info   00025274  00000000  00000000  00020114  2**0
+ 10 .debug_info   00025273  00000000  00000000  00020114  2**0
                   CONTENTS, READONLY, DEBUGGING
- 11 .debug_abbrev 00004af4  00000000  00000000  00045388  2**0
+ 11 .debug_abbrev 00004b03  00000000  00000000  00045387  2**0
                   CONTENTS, READONLY, DEBUGGING
- 12 .debug_aranges 00000f70  00000000  00000000  00049e80  2**3
+ 12 .debug_aranges 00000f70  00000000  00000000  00049e90  2**3
                   CONTENTS, READONLY, DEBUGGING
- 13 .debug_ranges 00000e38  00000000  00000000  0004adf0  2**3
+ 13 .debug_ranges 00000e38  00000000  00000000  0004ae00  2**3
                   CONTENTS, READONLY, DEBUGGING
- 14 .debug_line   00009071  00000000  00000000  0004bc28  2**0
+ 14 .debug_line   00009071  00000000  00000000  0004bc38  2**0
                   CONTENTS, READONLY, DEBUGGING
- 15 .debug_str    00005b21  00000000  00000000  00054c99  2**0
+ 15 .debug_str    00005b21  00000000  00000000  00054ca9  2**0
                   CONTENTS, READONLY, DEBUGGING
- 16 .comment      0000007c  00000000  00000000  0005a7ba  2**0
+ 16 .comment      0000007c  00000000  00000000  0005a7ca  2**0
                   CONTENTS, READONLY
- 17 .debug_frame  00003e9c  00000000  00000000  0005a838  2**2
+ 17 .debug_frame  00003e9c  00000000  00000000  0005a848  2**2
                   CONTENTS, READONLY, DEBUGGING
 
 Disassembly of section .text:
@@ -12733,7 +12733,7 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
   USBH_StatusTypeDef classReqStatus = USBH_BUSY;
  80053d2:	2301      	movs	r3, #1
  80053d4:	75bb      	strb	r3, [r7, #22]
-  HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData; 
+  HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData;
  80053d6:	687b      	ldr	r3, [r7, #4]
  80053d8:	f8d3 36ac 	ldr.w	r3, [r3, #1708]	; 0x6ac
  80053dc:	69db      	ldr	r3, [r3, #28]
@@ -23879,7 +23879,7 @@ void SystemClock_Config(void) // 168 MHz
  80099a4:	d004      	beq.n	80099b0 <SystemClock_Config+0x90>
   {
     _Error_Handler(__FILE__, __LINE__);
- 80099a6:	f240 2146 	movw	r1, #582	; 0x246
+ 80099a6:	f240 2145 	movw	r1, #581	; 0x245
  80099aa:	4825      	ldr	r0, [pc, #148]	; (8009a40 <SystemClock_Config+0x120>)
  80099ac:	f000 f950 	bl	8009c50 <_Error_Handler>
   }
@@ -23913,7 +23913,7 @@ void SystemClock_Config(void) // 168 MHz
  80099d8:	d004      	beq.n	80099e4 <SystemClock_Config+0xc4>
   {
     _Error_Handler(__FILE__, __LINE__);
- 80099da:	f44f 7115 	mov.w	r1, #596	; 0x254
+ 80099da:	f240 2153 	movw	r1, #595	; 0x253
  80099de:	4818      	ldr	r0, [pc, #96]	; (8009a40 <SystemClock_Config+0x120>)
  80099e0:	f000 f936 	bl	8009c50 <_Error_Handler>
   }
@@ -23933,7 +23933,7 @@ void SystemClock_Config(void) // 168 MHz
  80099fc:	d004      	beq.n	8009a08 <SystemClock_Config+0xe8>
   {
     _Error_Handler(__FILE__, __LINE__);
- 80099fe:	f240 215b 	movw	r1, #603	; 0x25b
+ 80099fe:	f240 215a 	movw	r1, #602	; 0x25a
  8009a02:	480f      	ldr	r0, [pc, #60]	; (8009a40 <SystemClock_Config+0x120>)
  8009a04:	f000 f924 	bl	8009c50 <_Error_Handler>
   }
@@ -24021,7 +24021,7 @@ static void MX_USART2_UART_Init(void)
  8009a88:	d004      	beq.n	8009a94 <MX_USART2_UART_Init+0x4c>
   {
     _Error_Handler(__FILE__, __LINE__);
- 8009a8a:	f240 2179 	movw	r1, #633	; 0x279
+ 8009a8a:	f44f 711e 	mov.w	r1, #632	; 0x278
  8009a8e:	4804      	ldr	r0, [pc, #16]	; (8009aa0 <MX_USART2_UART_Init+0x58>)
  8009a90:	f000 f8de 	bl	8009c50 <_Error_Handler>
   }
