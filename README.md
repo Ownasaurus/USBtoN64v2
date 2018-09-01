@@ -45,6 +45,9 @@ By: Ownasaurus
 
 ## Special thanks to:
 ????? ????? [Rainshifter] for help and support along the whole process
+
 Kazon Wilson [kwilson21] for help with Dualshock 4 support
+
 ???? ????? [Serisium] for help with PCB design and understanding the STM32 hardware
+
 Jeff Longo [?????] for help with PCB design and 3D case design
