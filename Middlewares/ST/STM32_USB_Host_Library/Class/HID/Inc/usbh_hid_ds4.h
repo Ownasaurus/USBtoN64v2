@@ -82,16 +82,7 @@ typedef struct __attribute__((packed))
 		 int16_t	gyroY;
 		 int16_t	gyroZ;
 
-		 uint8_t	externaldevices;
-
-		 uint8_t	unknown3[2];
-
-		 uint8_t	tpadevent:4;
-		 uint8_t	unknown4:4;
-
-		 uint8_t	trackpad[17];
-
-		 uint8_t	unknown5[11];
+		 uint8_t	therest[38];
 	  };
 	  uint8_t    data[64];
   };

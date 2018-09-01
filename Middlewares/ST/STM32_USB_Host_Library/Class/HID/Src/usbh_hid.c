@@ -121,14 +121,14 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
   interface = USBH_FindInterface(phost, phost->pActiveClass->ClassCode, HID_BOOT_CODE, 0xFF);
 
   if (interface == 0xFF) // did not find KB or mouse
-	  interface = USBH_FindInterface(phost, phost->pActiveClass->ClassCode, 0, 0xFF); // try looking for ds3
+	  interface = USBH_FindInterface(phost, phost->pActiveClass->ClassCode, 0, 0xFF); // try looking for ds3 and ds4
   
   if(interface == 0xFF) /* No Valid Interface */
   {
     status = USBH_FAIL;  
     USBH_DbgLog ("Cannot Find the interface for %s class.", phost->pActiveClass->Name);         
   }
-  else
+  else // something was found!
   {
     USBH_SelectInterface (phost, interface);
     phost->pActiveClass->pData = (HID_HandleTypeDef *)USBH_malloc (sizeof(HID_HandleTypeDef));
@@ -175,7 +175,7 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
     HID_Handle->length    = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].wMaxPacketSize;
     HID_Handle->poll      = phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].Ep_Desc[0].bInterval ;
     
-    if (HID_Handle->poll  < HID_MIN_POLL) 
+    if (HID_Handle->poll  < HID_MIN_POLL)
     {
       HID_Handle->poll = HID_MIN_POLL;
     }
@@ -286,9 +286,24 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
   {
   case HID_REQ_INIT:  
   case HID_REQ_GET_HID_DESC:
-    
-    /* Get HID Desc */ 
-    if (USBH_HID_GetHIDDescriptor (phost, USB_HID_DESC_SIZE)== USBH_OK)
+
+    /* Get HID Desc */
+	if(type == CONTROLLER_DS4)
+	{
+		uint8_t buffer[9] = {0x09,        // bLength
+				0x21,        // bDescriptorType (HID)
+				0x11, 0x01,  // bcdHID 1.17
+				0x00,        // bCountryCode
+				0x01,        // bNumDescriptors
+				0x22,        // bDescriptorType[0] (HID)
+				0xF3, 0x01,  // wDescriptorLength[0] 499
+				//0xD3, 0x01,  // wDescriptorLength[0] 467
+				};
+
+		USBH_HID_ParseHIDDesc(&HID_Handle->HID_Desc, buffer);
+		HID_Handle->ctl_state = HID_REQ_SET_IDLE;
+	}
+	else if (USBH_HID_GetHIDDescriptor (phost, USB_HID_DESC_SIZE) == USBH_OK) // try this function call earlier?
     {
       
       USBH_HID_ParseHIDDesc(&HID_Handle->HID_Desc, phost->device.Data);
@@ -303,17 +318,17 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
     if (USBH_HID_GetHIDReportDescriptor(phost, HID_Handle->HID_Desc.wItemLength) == USBH_OK)
     {
       /* The descriptor is available in phost->device.Data */
-    	if(phost->device.DevDesc.idVendor == 0x054C && phost->device.DevDesc.idProduct == 0x0268) // DS3 Sixaxis
+    	if(type == CONTROLLER_DS3)
     	{
     		HID_Handle->ctl_state = HID_PS3_BOOTCODE;
     	}
-    	else if(phost->device.DevDesc.idVendor == 0x054C && \
-    	    			(phost->device.DevDesc.idProduct == 0x05C4/*DS4 regular*/|| phost->device.DevDesc.idProduct == 0x09CC/*DS4 slim*/))
-    	{
-    		HID_Handle->ctl_state = HID_REQ_IDLE; // move on to normal input processing
+    	else if(type == CONTROLLER_DS4)
+		{
+			HID_Handle->ctl_state = HID_REQ_IDLE;
+			/* all requests performed*/
 			phost->pUser(phost, HOST_USER_CLASS_ACTIVE);
 			status = USBH_OK;
-    	}
+		}
     	else HID_Handle->ctl_state = HID_REQ_SET_IDLE;
     }
     
@@ -341,7 +356,14 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
     /* set Idle */
     if (classReqStatus == USBH_OK)
     {
-      HID_Handle->ctl_state = HID_REQ_SET_PROTOCOL;  
+    	if(type == CONTROLLER_DS4)
+    	{
+    		 HID_Handle->ctl_state = HID_REQ_GET_REPORT_DESC;
+    	}
+    	else
+		{
+    		HID_Handle->ctl_state = HID_REQ_SET_PROTOCOL;
+		}
     }
     else if(classReqStatus == USBH_NOT_SUPPORTED) 
     {
@@ -389,7 +411,7 @@ static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost)
                            0x01,
                             0,
                             HID_Handle->pData,
-                            HID_Handle->length) == USBH_OK)
+                            HID_Handle->length) == USBH_OK || type == CONTROLLER_DS4)
     {
       
       fifo_write(&HID_Handle->fifo, HID_Handle->pData, HID_Handle->length);  
@@ -673,36 +695,29 @@ static void  USBH_HID_ParseHIDDesc (HID_DescTypeDef *desc, uint8_t *buf)
   */
 HID_TypeTypeDef USBH_HID_GetDeviceType(USBH_HandleTypeDef *phost)
 {
-  HID_TypeTypeDef   type = HID_UNKNOWN;
   
   if(phost->gState == HOST_CLASS)
   {
     
-    if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol \
-      == HID_KEYBRD_BOOT_CODE)
+    if(type == CONTROLLER_KB)
     {
-      type = HID_KEYBOARD;  
+      return HID_KEYBOARD;
     }
-    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol \
-      == HID_MOUSE_BOOT_CODE)		  
-    {
-      type=  HID_MOUSE;  
-    }
-    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol \
-	  == HID_DS3_BOOT_CODE)
+    else if(type == CONTROLLER_DS3)
 	{
-    	if(phost->device.DevDesc.idVendor == 0x054C && phost->device.DevDesc.idProduct == 0x0268)
-		{
-			type = HID_DS3;
-		}
-		else if(phost->device.DevDesc.idVendor == 0x054C && \
-				(phost->device.DevDesc.idProduct == 0x05C4 || phost->device.DevDesc.idProduct == 0x09CC))
-		{
-			type = HID_DS4;
-		}
+		return HID_DS3;
+	}
+    else if(type == CONTROLLER_DS4)
+	{
+		return HID_DS4;
+	}
+    else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol \
+          == HID_MOUSE_BOOT_CODE)
+	{
+	  return HID_MOUSE;
 	}
   }
-  return type;
+  return HID_UNKNOWN;
 }
 
 
@@ -837,6 +852,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 	HID_DS3_Info_TypeDef* ds3_state = NULL;
 	HID_DS4_Info_TypeDef* ds4_state = NULL;
 	N64ControllerData new_data;
+	uint64_t buttons_and_triggers;
 
 	type = USBH_HID_GetDeviceType(phost);
 
@@ -972,7 +988,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 			break;
 		case HID_DS3:
 			ds3_state = USBH_HID_GetDS3Info(phost);
-			uint64_t buttons_and_triggers = USBH_HID_GetDS3ButtonsAndTriggers();
+			buttons_and_triggers = USBH_HID_GetDS3ButtonsAndTriggers();
 
 			if(state == NORMAL)
 			{
@@ -1197,8 +1213,231 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 			break;
 		case HID_DS4:
 			ds4_state = USBH_HID_GetDS4Info(phost);
-			buttons_and_triggers = USBH_HID_GetDS3ButtonsAndTriggers();
-			ds4_state->LAnalogY = ds4_state->LAnalogY;
+
+			buttons_and_triggers = USBH_HID_GetDS4ButtonsAndTriggers();
+
+			if(state == NORMAL)
+			{
+				memset(&new_data,0,4);
+
+				if(buttons_and_triggers & controls.XpadControls.up)
+				{
+					new_data.up = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.down)
+				{
+					new_data.down = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.left)
+				{
+					new_data.left = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.right)
+				{
+					new_data.right = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_up)
+				{
+					new_data.c_up = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_down)
+				{
+					new_data.c_down = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_left)
+				{
+					new_data.c_left = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.c_right)
+				{
+					new_data.c_right = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.l)
+				{
+					new_data.l = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.r)
+				{
+					new_data.r = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.z)
+				{
+					new_data.z = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.a)
+				{
+					new_data.a = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.b)
+				{
+					new_data.b = 1;
+				}
+				if(buttons_and_triggers & controls.XpadControls.start)
+				{
+					new_data.start = 1;
+				}
+
+				// ----- begin nrage replication analog code -----
+				const float N64_MAX = 127*(controls.XpadControls.range/100.0f);
+				float deadzoneValue = (controls.XpadControls.deadzone/100.0f) * DS3_MAX;
+				float deadzoneRelation = DS3_MAX / (DS3_MAX - deadzoneValue);
+
+				int8_t LSX = 0, LSY = 0; // -128 to +127...
+				float unscaled_result = 0;
+
+				// conversion from [0,255] to [-128,+127]
+				int8_t stick_lx = ds4_state->LAnalogX - 128;
+				int8_t stick_ly = ds4_state->LAnalogY - 128;
+
+				if(stick_lx >= deadzoneValue) // positive = right
+				{
+					unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+					LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+				}
+				else if(stick_lx <= (-deadzoneValue)) // negative = left
+				{
+					stick_lx++; // just in case it's -128 it cannot be negated. otherwise the change of 1 is negligible.
+					stick_lx = -stick_lx; // compute as positive, then negate at the end
+					unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+					LSX = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+					LSX = -LSX;
+				}
+
+				if(stick_ly >= deadzoneValue) // DS3 positive = down
+				{
+					unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+					LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+					LSY = -LSY; // for n64 down is negative
+				}
+				else if(stick_ly <= (-deadzoneValue)) // DS3 negative = up
+				{
+					stick_ly++; // just in case it's -128 it cannot be negated. otherwise the change of 1 is negligible.
+					stick_ly = -stick_ly; // compute as positive
+					unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+					LSY = (int8_t)(unscaled_result * (N64_MAX / DS3_MAX));
+				}
+				new_data.x_axis = reverse((uint8_t)LSX);
+				new_data.y_axis = reverse((uint8_t)LSY);
+				// end of analog code
+
+				// atomic update of n64 state
+				__disable_irq();
+				memcpy(&n64_data, &new_data,4);
+				__enable_irq();
+			}
+			else if(state == STATE_SENSITIVITY)
+			{
+				uint64_t b = DetectButtonDS3(buttons_and_triggers); // read for button presses (just do linear search)
+				if(b == XPAD_HAT_UP) // +5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range < 95 ? controls.XpadControls.range+5 : 100;
+					}
+				}
+				else if(b == XPAD_HAT_DOWN) // -5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range > 5 ? controls.XpadControls.range-5 : 0;
+					}
+				}
+				else if(b == XPAD_HAT_LEFT) // -1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range > 1 ? controls.XpadControls.range-1 : 0;
+					}
+								}
+				else if(b == XPAD_HAT_RIGHT)// +1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.range = controls.XpadControls.range < 99 ? controls.XpadControls.range+1 : 100;
+					}
+				}
+				else if(b == XPAD_PAD_A) // OK
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						AdvanceState();
+					}
+				}
+				else
+				{
+					ds3ButtonPressed = 0;
+				}
+			}
+			else if(state == STATE_DEADZONE)
+			{
+				uint64_t b = DetectButtonDS3(buttons_and_triggers); // read for button presses (just do linear search)
+				if(b == XPAD_HAT_UP) // +5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone < 95 ? controls.XpadControls.deadzone+5 : 100;
+					}
+				}
+				else if(b == XPAD_HAT_DOWN) // -5
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone > 5 ? controls.XpadControls.deadzone-5 : 0;
+					}
+				}
+				else if(b == XPAD_HAT_LEFT) // -1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone > 1 ? controls.XpadControls.deadzone-1 : 0;
+					}
+								}
+				else if(b == XPAD_HAT_RIGHT)// +1
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						controls.XpadControls.deadzone = controls.XpadControls.deadzone < 99 ? controls.XpadControls.deadzone+1 : 100;
+					}
+				}
+				else if(b == XPAD_PAD_A) // OK
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						//keep ds3ButtonPressed at 0 for next time since we're done
+						AdvanceState();
+					}
+				}
+				else
+				{
+					ds3ButtonPressed = 0;
+				}
+			}
+			else
+			{
+				uint64_t b = DetectButtonDS3(buttons_and_triggers); // read for button presses (just do linear search)
+				if(b != 0) /*button was actually is pressed*/
+				{
+					if(ds3ButtonPressed == 0)
+					{
+						ds3ButtonPressed = 1;
+						ChangeButtonMappingController(b);
+						AdvanceState();
+					}
+				}
+				else
+				{
+					ds3ButtonPressed = 0;
+				}
+			}
 			break;
 		default:
 			break;

@@ -4,7 +4,8 @@ Utilizes Nucleo-F446RE board with custom header for usb and n64 communication
 
 Currently supported USB devices:
 - Keyboard
-- Playstation Dualshock 3 Sixaxis
+- Dualshock 3 Sixaxis
+- Dualshock 4 (with help from Kazon Wilson [kwilson21])
 - Wireless Xbox 360 with Microsoft USB wireless receiver
 - Wired Xbox 360
 - Wired Xbox One
@@ -38,12 +39,12 @@ Currently known bugs
 - None!
 
 ## TODO:
-- implement PS4 support (currently in process by myself and Kazon Wilson [kwilson21])
 - discover and fix bugs
 
 By: Ownasaurus
 
 ## Special thanks to:
-Kazon Wilson [kwilson21]
-
-????? ????? [Rainshifter]
+????? ????? [Rainshifter] for help and support along the whole process
+Kazon Wilson [kwilson21] for help with Dualshock 4 support
+???? ????? [Serisium] for help with PCB design and understanding the STM32 hardware
+Jeff Longo [?????] for help with PCB design and 3D case design
