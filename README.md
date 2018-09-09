@@ -1,6 +1,9 @@
 # USBtoN64v2
 Currently in beta testing phase
+
 Utilizes Nucleo-F446RE board with custom header for usb and n64 communication
+
+The "Custom Board" directory contains a 3D case and PCB which are being built and tested ASAP.
 
 Currently supported USB devices:
 - Keyboard
@@ -15,7 +18,7 @@ Currently supported USB devices:
 2) Press the buttons in the following order depending on which device is plugged in. For Xbox and PS, you also need to set range and deadzone. Please see below for instructions.
 3) (optional) Press the blue button again at any time to exit “set controls” mode early if you make a mistake.
 
-### Xbox / PS3:
+### Xbox / Playstation:
 DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, BUTTON_START, BUTTON_B, BUTTON_A, C_UP, C_DOWN, C_LEFT, C_RIGHT, BUTTON_L, BUTTON_R, BUTTON_Z
 
 Next you set your RANGE. It starts at 100 by default.
@@ -39,7 +42,8 @@ Currently known bugs
 - None!
 
 ## TODO:
-- discover and fix bugs
+- Complete LED support for PS4 (currently non-functional)
+- Re-design PCB (and case) to be significantly smaller
 
 By: Ownasaurus
 
