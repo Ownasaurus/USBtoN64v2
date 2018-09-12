@@ -6120,12 +6120,12 @@ Standard 1-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <library name="S-1172B33-U5T1G">
 <packages>
 <package name="S-1172B33-U5T1G">
-<smd name="VOUT" x="-1.91" y="2.64" dx="0.76" dy="1.27" layer="1"/>
-<smd name="VIN" x="1.91" y="2.64" dx="0.76" dy="1.27" layer="1"/>
-<smd name="GND3" x="1.91" y="-2.64" dx="0.76" dy="1.27" layer="1"/>
-<smd name="EN" x="-1.91" y="-2.64" dx="0.76" dy="1.27" layer="1"/>
-<smd name="GND2" x="0" y="2.64" dx="2.03" dy="1.27" layer="1"/>
-<smd name="GND" x="0" y="-2.64" dx="2.03" dy="1.27" layer="1"/>
+<smd name="VOUT" x="-1.5" y="1.85" dx="0.7" dy="1.5" layer="1"/>
+<smd name="VIN" x="1.5" y="1.85" dx="0.7" dy="1.5" layer="1"/>
+<smd name="GND3" x="1.5" y="-1.85" dx="0.7" dy="1.5" layer="1"/>
+<smd name="EN" x="-1.5" y="-1.85" dx="0.7" dy="1.5" layer="1"/>
+<smd name="GND2" x="0" y="1.85" dx="1" dy="1.5" layer="1"/>
+<smd name="GND" x="0" y="-1.85" dx="1" dy="1.5" layer="1"/>
 <wire x1="-2.51" y1="1.95" x2="2.51" y2="1.95" width="0.127" layer="21"/>
 <wire x1="2.51" y1="1.95" x2="2.51" y2="-1.95" width="0.127" layer="21"/>
 <wire x1="2.51" y1="-1.95" x2="-2.51" y2="-1.95" width="0.127" layer="21"/>
