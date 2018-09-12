@@ -1,9 +1,7 @@
 # USBtoN64v2
-Currently in beta testing phase
+Utilizes STM32F446 on a Nucleo-F446RE with custom header or on a fully custom board for usb and n64 communication.
 
-Utilizes Nucleo-F446RE board with custom header for usb and n64 communication
-
-The "Custom Board" directory contains a 3D case and PCB which are being built and tested ASAP.
+In this repository, you can find the latest version of the source code (TrueSTUDIO), 3D case (.stl), and PCB (Eagle .brd and .sch) files.
 
 Currently supported USB devices:
 - Keyboard
@@ -14,9 +12,9 @@ Currently supported USB devices:
 - Wired Xbox One
 
 ## Setting the controls:
-1) Press the blue button. A new LED (light) should light up solid when you go into "set controls" mode, and it should turn off when you finish setting the controls correctly.
-2) Press the buttons in the following order depending on which device is plugged in. For Xbox and PS, you also need to set range and deadzone. Please see below for instructions.
-3) (optional) Press the blue button again at any time to exit “set controls” mode early if you make a mistake.
+1) Press the blue button on the Nucleo or the only button on the custom PCB. A new green LED (light) should light up solid when you go into "set controls" mode, and it should turn off when you finish setting the controls correctly.
+2) Press the buttons in the appropriate order depending on which device is plugged in. For Xbox and PS, you also need to set range and deadzone. Please see below for instructions.
+3) (optional) Press the same button again at any time to exit “set controls” mode early if you make a mistake.
 
 ### Xbox / Playstation:
 DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, BUTTON_START, BUTTON_B, BUTTON_A, C_UP, C_DOWN, C_LEFT, C_RIGHT, BUTTON_L, BUTTON_R, BUTTON_Z
@@ -43,7 +41,7 @@ Currently known bugs
 
 ## TODO:
 - Complete LED support for PS4 (currently non-functional)
-- Re-design PCB (and case) to be significantly smaller
+- Re-design PCB (and case) to be significantly smaller (in progress)
 
 By: Ownasaurus
 
