@@ -411,7 +411,7 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
   */
 static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost)
 {
-  USBH_StatusTypeDef status = USBH_OK;
+  USBH_StatusTypeDef status = USBH_OK, getreport_result;
   HID_HandleTypeDef *HID_Handle =  (HID_HandleTypeDef *) phost->pActiveClass->pData;
   
   switch (HID_Handle->state)
@@ -419,11 +419,12 @@ static USBH_StatusTypeDef USBH_HID_Process(USBH_HandleTypeDef *phost)
   case HID_INIT:
     HID_Handle->Init(phost); 
   case HID_IDLE:
-    if(USBH_HID_GetReport (phost,
-                           0x01,
-                            0,
-                            HID_Handle->pData,
-                            HID_Handle->length) == USBH_OK || type == CONTROLLER_DS4)
+	getreport_result = USBH_HID_GetReport (phost,
+	  	                             0x01,
+	  	                              0,
+	  	                              HID_Handle->pData,
+	  	                              HID_Handle->length);
+	if(getreport_result == USBH_OK || getreport_result == USBH_NOT_SUPPORTED)
     {
       
       fifo_write(&HID_Handle->fifo, HID_Handle->pData, HID_Handle->length);  
