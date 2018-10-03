@@ -36,9 +36,6 @@ A_UP, A_DOWN, A_LEFT, A_RIGHT, DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT, BUTTON
 
 Note that the device saves the controls even when the device is powered off. It saves the Xbox and Playstation controls together as a shared layout and the Keyboard controls separately.
 
-Currently known bugs
-- None!
-
 ## Updating the firmware:
 
 ### Nucleo (Prototype consisting of 2 connected boards)
@@ -58,6 +55,9 @@ Then, unplug the device from the PC. Finally, flip the switch back "1".
 ## TODO:
 - Complete LED support for PS4 (currently non-functional)
 - Re-design PCB (and case) to be significantly smaller (in progress)
+
+## Currently known bugs:
+- None!
 
 By: Ownasaurus
 
