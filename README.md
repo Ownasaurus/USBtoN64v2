@@ -39,6 +39,22 @@ Note that the device saves the controls even when the device is powered off. It 
 Currently known bugs
 - None!
 
+## Updating the firmware:
+
+### Nucleo (Prototype consisting of 2 connected boards)
+Plug the device into a PC with a USB mini B cable, and drag&drop a .bin firmware file.
+
+### v2 (one board in a case distributed only after 09/2018)
+The v2 has a switch with two possible positions: "ON" or "1" (which is qutie confusing if you ask me).
+- *The switch should be set to "1" for normal operation.*
+- *The switch should be set to "ON" for firmware upgrade.*
+- *The switch should be never be flipped while the device is powered to "ON" for firmware upgrade.*
+
+So, first fip the switch to "ON". Plug the device into a PC with a USB mini B cable, and it should show up as a USB DFU device.
+Use the "DfuSeDemo" software provided by STMicroelectronics to update the firmware with a .dfu file.
+The "Dfu file manager" software is also provided alongside the "DfuSeDemo" by STMicroelectronics.
+Then, unplug the device from the PC. Finally, flip the switch back "1".
+
 ## TODO:
 - Complete LED support for PS4 (currently non-functional)
 - Re-design PCB (and case) to be significantly smaller (in progress)
