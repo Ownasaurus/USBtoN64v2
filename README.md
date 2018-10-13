@@ -6,7 +6,7 @@ In this repository, you can find the latest version of the source code (TrueSTUD
 Currently supported USB devices:
 - Keyboard
 - Dualshock 3 Sixaxis
-- Dualshock 4 (with help from Kazon Wilson [kwilson21])
+- Dualshock 4 v1 (with help from Kazon Wilson [kwilson21]) and v2
 - Wireless Xbox 360 with Microsoft USB wireless receiver
 - Wired Xbox 360
 - Wired Xbox One

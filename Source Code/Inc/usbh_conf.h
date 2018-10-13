@@ -99,7 +99,7 @@
 #define USBH_MAX_NUM_ENDPOINTS      2
  
 /*----------   -----------*/
-#define USBH_MAX_NUM_INTERFACES      4
+#define USBH_MAX_NUM_INTERFACES      8
  
 /*----------   -----------*/
 #define USBH_MAX_NUM_CONFIGURATION      1

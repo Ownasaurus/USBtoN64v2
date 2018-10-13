@@ -234,19 +234,22 @@ USBH_StatusTypeDef USBH_SelectInterface(USBH_HandleTypeDef *phost, uint8_t inter
 {
   USBH_StatusTypeDef   status = USBH_OK;
   
-  if(interface < phost->device.CfgDesc.bNumInterfaces)
-  {
+  // This check got removed because, for example, the DS4v2 controller has 4 interfaces
+  // but one interface has two entries for some reason so the driver reads it as 5 interfaces
+  // since 5 is not less than bNumInterfaces(4), it fails to select the interface :(
+  //if(interface < phost->device.CfgDesc.bNumInterfaces)
+  //{
     phost->device.current_interface = interface;
     USBH_UsrLog ("Switching to Interface (#%d)", interface);
     USBH_UsrLog ("Class    : %xh", phost->device.CfgDesc.Itf_Desc[interface].bInterfaceClass );
     USBH_UsrLog ("SubClass : %xh", phost->device.CfgDesc.Itf_Desc[interface].bInterfaceSubClass );
     USBH_UsrLog ("Protocol : %xh", phost->device.CfgDesc.Itf_Desc[interface].bInterfaceProtocol );                 
-  }
+  /*}
   else
   {
     USBH_ErrLog ("Cannot Select This Interface.");
     status = USBH_FAIL; 
-  }
+  }*/
   return status;  
 }
 
@@ -516,10 +519,13 @@ USBH_StatusTypeDef  USBH_Process(USBH_HandleTypeDef *phost)
       
       for (idx = 0; idx < USBH_MAX_NUM_SUPPORTED_CLASS ; idx ++)
       {
-        if(phost->pClass[idx]->ClassCode == phost->device.CfgDesc.Itf_Desc[0].bInterfaceClass)
-        {
-          phost->pActiveClass = phost->pClass[idx];
-        }
+    	for(int dev_itf_index = 0; dev_itf_index < USBH_MAX_NUM_INTERFACES;dev_itf_index++)
+    	{
+          if(phost->pClass[idx]->ClassCode == phost->device.CfgDesc.Itf_Desc[dev_itf_index].bInterfaceClass)
+          {
+            phost->pActiveClass = phost->pClass[idx];
+          }
+    	}
       }
       
       if(phost->pActiveClass != NULL)

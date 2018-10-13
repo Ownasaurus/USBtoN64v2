@@ -154,14 +154,16 @@ static USBH_StatusTypeDef USBH_HID_InterfaceInit (USBH_HandleTypeDef *phost)
     }
     else if(phost->device.CfgDesc.Itf_Desc[phost->device.current_interface].bInterfaceProtocol == HID_DS3_BOOT_CODE)
 	{
-    	if(phost->device.DevDesc.idVendor == 0x054C && phost->device.DevDesc.idProduct == 0x0268)
+    	if((phost->device.DevDesc.idVendor == 0x054C && phost->device.DevDesc.idProduct == 0x0268) || \
+    			(phost->device.DevDesc.idVendor == 0x20D6 && phost->device.DevDesc.idProduct == 0xCA6D)/*Pro Ex*/)
     	{
 			USBH_UsrLog ("DS3 device found!");
 			HID_Handle->Init =  USBH_HID_DS3Init;
 			type = CONTROLLER_DS3;
     	}
-    	else if(phost->device.DevDesc.idVendor == 0x054C && \
-    			(phost->device.DevDesc.idProduct == 0x05C4/*regular*/|| phost->device.DevDesc.idProduct == 0x09CC/*slim*/))
+    	else if((phost->device.DevDesc.idVendor == 0x054C && \
+    			(phost->device.DevDesc.idProduct == 0x05C4/*regular*/|| phost->device.DevDesc.idProduct == 0x09CC/*slim*/)) ||
+				(phost->device.DevDesc.idVendor == 0x0F0D && phost->device.DevDesc.idProduct == 0x0066) /*Hori ps4*/)
 		{
     		USBH_UsrLog ("DS4 device found!");
     		HID_Handle->Init =  USBH_HID_DS4Init;
@@ -352,13 +354,14 @@ static USBH_StatusTypeDef USBH_HID_ClassRequest(USBH_HandleTypeDef *phost)
   	  break;
   case HID_PS4_LED:
 	  // ps4 led info. write with HID report id 0x05 (HID set report?)
-	  if(USBH_HID_SetReport(phost,0x02,0x05,ps4_led_buffer,31) == USBH_OK)  // turn on p1 LED
-	  {
-		  HID_Handle->ctl_state = HID_REQ_IDLE;
+	  // TODO: DS4v2 gets stuck here, so disabling for now until we figure out how to fix this
+	  //if(USBH_HID_SetReport(phost,0x02,0x05,ps4_led_buffer,31) == USBH_OK)  // turn on p1 LED
+	  //{
+		HID_Handle->ctl_state = HID_REQ_IDLE;
 		/* all requests performed*/
 		phost->pUser(phost, HOST_USER_CLASS_ACTIVE);
 		status = USBH_OK;
-	  }
+	  //}
 	  break;
 
   case HID_REQ_SET_IDLE:
