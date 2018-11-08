@@ -69,3 +69,12 @@ Kazon Wilson [kwilson21] for help with Dualshock 4 support
 ???? ????? [Serisium] for help with PCB design and understanding the STM32 hardware
 
 Jeff Longo [?????] for help with PCB design and 3D case design
+
+# Gamecube support - ALPHA
+Gamecube support is currently in the experimental phase.
+- If the data line and ground lines of a Gamecube cable are connected to the adapter, it should function.
+- If BOTH N64 and Gamecube cables are attached, the device should be able to automatically detect which console is being used. The unused cable MUST be unplugged for proper functionality.
+- Only XBOX controllers are currently supported.
+- The controls are currently static and mimic the Gamecube controller layout.
+- The sensitivity and deadzone are "borrowed" from the N64 controller settings.
+- GC(X) / XBOX(B) button is currently un-mapped due to Rainshifter's preferences for bug testing.
