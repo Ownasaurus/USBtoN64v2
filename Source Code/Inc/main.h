@@ -103,6 +103,14 @@ typedef enum
  }
  ControllerType;
 
+ typedef enum
+  {
+    OUTPUT_UNDEFINED = 0,
+    OUTPUT_N64,
+    OUTPUT_GC
+  }
+  OutputType;
+
 typedef struct __attribute__((packed))
 {
     unsigned int a : 1; // 1 bit wide
@@ -128,6 +136,34 @@ typedef struct __attribute__((packed))
     char y_axis;
 
 } N64ControllerData; // all bits are in the correct order... except for the analog
+
+typedef struct __attribute__((packed))
+{
+
+	unsigned int beginning_zeros : 3;
+	unsigned int start : 1;
+	unsigned int y : 1;
+    unsigned int x : 1; // 1 bit wide
+    unsigned int b : 1;
+    unsigned int a : 1;
+
+    unsigned int beginning_one : 1;
+    unsigned int l : 1;
+    unsigned int r : 1;
+    unsigned int z : 1;
+    unsigned int d_up : 1;
+    unsigned int d_down : 1;
+    unsigned int d_right : 1;
+    unsigned int d_left : 1;
+
+    uint8_t a_x_axis;
+    uint8_t a_y_axis;
+    uint8_t c_x_axis;
+    uint8_t c_y_axis;
+    uint8_t l_trigger;
+    uint8_t r_trigger;
+
+} GCControllerData; // all bits are in the correct order... except for the analog
 
 typedef enum
 {
@@ -206,6 +242,7 @@ typedef struct __attribute__((packed))
 }
 Controls;
 
+OutputType output_type;
 uint8_t reverse(uint8_t b);
 /* USER CODE END Private defines */
 

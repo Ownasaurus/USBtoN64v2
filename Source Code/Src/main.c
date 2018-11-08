@@ -73,6 +73,7 @@ ControllerType type = CONTROLLER_NONE;
 /* USER CODE BEGIN PV */
 /* Private variables ---------------------------------------------------------*/
 N64ControllerData n64_data;
+GCControllerData gc_data;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -338,7 +339,7 @@ void SendByte(unsigned char b)
     }
 }
 
-void SendIdentity()
+void SendIdentityN64()
 {
     // reply 0x05, 0x00, 0x02
     SendByte(0x05);
@@ -347,7 +348,16 @@ void SendIdentity()
     SendStop();
 }
 
-void SendControllerData()
+
+void SendIdentityGC()
+{
+    SendByte(0x90);
+    SendByte(0x00);
+    SendByte(0x0C);
+    SendStop();
+}
+
+void SendControllerDataN64()
 {
     unsigned long data = *(unsigned long*)&n64_data;
     unsigned int size = sizeof(data) * 8; // should be 4 bytes * 8 = 32 bits
@@ -367,6 +377,55 @@ void SendControllerData()
     SendStop();
 }
 
+void SendControllerDataGC()
+{
+    uint64_t data = *(uint64_t*)&gc_data;
+    unsigned int size = sizeof(data) * 8; // should be 8 bytes * 8 = 64 bits
+
+    for(unsigned int i = 0;i < size;i++)
+    {
+        if((data >> i) & 1)
+        {
+            write_1();
+        }
+        else
+        {
+            write_0();
+        }
+    }
+
+    SendStop();
+}
+
+void SendOriginGC()
+{
+	gc_data.a_x_axis = reverse(128);
+	gc_data.a_y_axis = reverse(128);
+	gc_data.c_x_axis = reverse(128);
+	gc_data.c_y_axis = reverse(128);
+	gc_data.l_trigger = 0;
+	gc_data.r_trigger = 0;
+
+	uint64_t data = *(uint64_t*)&gc_data;
+	unsigned int size = sizeof(data) * 8; // should be 8 bytes * 8 = 64 bits
+
+	for(unsigned int i = 0;i < size;i++)
+	{
+		if((data >> i) & 1)
+		{
+			write_1();
+		}
+		else
+		{
+			write_0();
+		}
+	}
+
+	SendByte(0x00);
+	SendByte(0x00);
+	SendStop();
+}
+
 // 0 is 3 microseconds low followed by 1 microsecond high
 // 1 is 1 microsecond low followed by 3 microseconds high
 // if either of these while loops is going on 4us or more, break out of the function
@@ -380,7 +439,7 @@ uint8_t GetMiddleOfPulse()
         if(GPIOA->IDR & 0x0100) break;
 
         ct++;
-        if(ct == 150) // failsafe limit TBD
+        if(ct == 200) // failsafe limit TBD
         	return 5; // error code
     }
 
@@ -392,7 +451,7 @@ uint8_t GetMiddleOfPulse()
         if(!(GPIOA->IDR & 0x0100)) break;
 
         ct++;
-		if(ct == 150) // failsafe limit TBD
+		if(ct == 200) // failsafe limit TBD
 			return 5; // error code
     }
 
@@ -404,27 +463,38 @@ uint8_t GetMiddleOfPulse()
     return (GPIOA->IDR & 0x0100) ? 1U : 0U;
 }
 
-// continuously read bits until at least 9 are read, confirm valid command, return without stop bit
-uint8_t readCommand()
+
+
+uint32_t readCommand()
 {
 	uint8_t retVal;
 
 	// we are already at the first falling edge
 	// get middle of first pulse, 2us later
 	my_wait_us_asm(2);
-    unsigned int command = (GPIOA->IDR & 0x0100) ? 1U : 0U, bits_read = 1;
+	uint32_t command = (GPIOA->IDR & 0x0100) ? 1U : 0U, bits_read = 1;
 
-    while(1) // read at least 9 bits (2 bytes + stop bit)
+    while(1) // read at least 9 bits (1 byte + stop bit)
     {
         command = command << 1; // make room for the new bit
         retVal = GetMiddleOfPulse();
         if(retVal == 5) // timeout
-        	return retVal;
+        {
+        	if(bits_read >= 8)
+        	{
+				command = command >> 2; // get rid of the stop bit AND the room we made for an additional bit
+				return command;
+        	}
+        	else // there is no possible way this can be a real command
+        	{
+        		return 5; // dummy value
+        	}
+        }
         command += retVal;
 
         bits_read++;
 
-        if(bits_read >= 9) // only consider when at least a whole command's length has been read
+        if(bits_read >= 25) // this is the longest known command length
         {
         	command = command >> 1; // get rid of the stop bit (which is always a 1)
         	return command;
@@ -442,8 +512,10 @@ uint8_t readCommand()
 int main(void)
 {
   /* USER CODE BEGIN 1 */
-
+  output_type = OUTPUT_UNDEFINED;
   memset(&n64_data,0,4); // clear controller state
+  memset(&gc_data,0,8); // clear controller state
+  gc_data.beginning_one = 1;
   LoadControls();
 
   /* USER CODE END 1 */

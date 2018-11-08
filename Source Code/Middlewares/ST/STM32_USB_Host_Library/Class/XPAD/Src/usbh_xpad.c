@@ -90,6 +90,7 @@ NULL,
 };
 
 extern N64ControllerData n64_data;
+extern GCControllerData gc_data;
 
 /** @defgroup USBH_XPAD_CORE_Private_Functions
 * @{
@@ -194,109 +195,278 @@ void parseMessage(USBH_HandleTypeDef *phost)
 
     if(state == NORMAL) //used to check state variable for changing controls
     {
-    	N64ControllerData new_data;
-    	memset(&new_data,0,4); // clear controller state
+    	if(output_type == OUTPUT_N64)
+		{
+			N64ControllerData new_data;
+			memset(&new_data,0,4); // clear controller state
 
-    	if(buttons_and_triggers & controls.XpadControls.up)
-		{
-    		new_data.up = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.down)
-		{
-			new_data.down = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.left)
-		{
-			new_data.left = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.right)
-		{
-			new_data.right = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.c_up)
-		{
-			new_data.c_up = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.c_down)
-		{
-			new_data.c_down = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.c_left)
-		{
-			new_data.c_left = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.c_right)
-		{
-			new_data.c_right = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.l)
-		{
-			new_data.l = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.r)
-		{
-			new_data.r = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.z)
-		{
-			new_data.z = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.a)
-		{
-			new_data.a = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.b)
-		{
-			new_data.b = 1;
-		}
-		if(buttons_and_triggers & controls.XpadControls.start)
-		{
-			new_data.start = 1;
-		}
+			if(buttons_and_triggers & controls.XpadControls.up)
+			{
+				new_data.up = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.down)
+			{
+				new_data.down = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.left)
+			{
+				new_data.left = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.right)
+			{
+				new_data.right = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.c_up)
+			{
+				new_data.c_up = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.c_down)
+			{
+				new_data.c_down = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.c_left)
+			{
+				new_data.c_left = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.c_right)
+			{
+				new_data.c_right = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.l)
+			{
+				new_data.l = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.r)
+			{
+				new_data.r = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.z)
+			{
+				new_data.z = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.a)
+			{
+				new_data.a = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.b)
+			{
+				new_data.b = 1;
+			}
+			if(buttons_and_triggers & controls.XpadControls.start)
+			{
+				new_data.start = 1;
+			}
 
-    	// ----- begin nrage replication analog code -----
-		const float N64_MAX = 127*(controls.XpadControls.range/100.0f);
-    	float deadzoneValue = (controls.XpadControls.deadzone/100.0f) * XPAD_MAX;
-    	float deadzoneRelation = XPAD_MAX / (XPAD_MAX - deadzoneValue);
+			// ----- begin nrage replication analog code -----
+			const float N64_MAX = 127*(controls.XpadControls.range/100.0f);
+			float deadzoneValue = (controls.XpadControls.deadzone/100.0f) * XPAD_MAX;
+			float deadzoneRelation = XPAD_MAX / (XPAD_MAX - deadzoneValue);
 
-    	LSX = LSY = 0; // -128 to +127...
-    	float unscaled_result = 0;
+			float unscaled_result = 0;
 
-    	if(stick_lx >= deadzoneValue) // positive = right
-    	{
-    		unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
-    		LSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
-    	}
-    	else if(stick_lx <= (-deadzoneValue)) // negative = left
-    	{
-    		stick_lx++; // just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
-    		stick_lx = -stick_lx; // compute as positive, then negate at the end
-    		unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
-    		LSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
-    		LSX = -LSX;
-    	}
+			int16_t temp_stick_val = 0;
 
-    	if(stick_ly >= deadzoneValue) // positive = up
-    	{
-    		unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
-    		LSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
-    	}
-    	else if(stick_ly <= (-deadzoneValue)) // negative = down
-    	{
-    		stick_ly++; // just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
-    		stick_ly = -stick_ly; // compute as positive, then negate at the end
-    		unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
-    		LSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
-    		LSY = -LSY;
-    	}
-    	new_data.x_axis = reverse(LSX);
-    	new_data.y_axis = reverse(LSY);
+			if(stick_lx >= deadzoneValue) // positive = right
+			{
+				unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+				LSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+			}
+			else if(stick_lx <= (-deadzoneValue)) // negative = left
+			{
+				// just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
+				temp_stick_val = -(stick_lx+1); // compute as positive, then negate at the end
+				unscaled_result = (temp_stick_val - deadzoneValue) * deadzoneRelation;
+				LSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+				LSX = -LSX;
+			}
+			else
+			{
+				LSX = 0;
+			}
 
-    	// ----- end nrage replication analog code -----
+			if(stick_ly >= deadzoneValue) // positive = up
+			{
+				unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+				LSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+			}
+			else if(stick_ly <= (-deadzoneValue)) // negative = down
+			{
+				// just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
+				temp_stick_val = -(stick_ly+1); // compute as positive, then negate at the end
+				unscaled_result = (temp_stick_val - deadzoneValue) * deadzoneRelation;
+				LSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+				LSY = -LSY;
+			}
+			else
+			{
+				LSY = 0;
+			}
 
-    	__disable_irq();
-		memcpy(&n64_data, &new_data,4);
-		__enable_irq();
+			new_data.x_axis = reverse(LSX);
+			new_data.y_axis = reverse(LSY);
+
+			// ----- end nrage replication analog code -----
+
+			__disable_irq();
+			memcpy(&n64_data, &new_data,4);
+			__enable_irq();
+		}
+		else if(output_type == OUTPUT_GC)
+		{
+			GCControllerData new_data;
+			memset(&new_data,0,8); // clear controller state
+			new_data.beginning_one = 1;
+
+			if(buttons_and_triggers & XPAD_PAD_A) // was A pressed?
+			{
+				new_data.a = 1;
+			}
+			if(buttons_and_triggers & XPAD_PAD_X)
+			{
+				new_data.b = 1;
+			}
+			if(buttons_and_triggers & XPAD_PAD_Y)
+			{
+				new_data.y = 1;
+			}
+			if(buttons_and_triggers & XPAD_HAT_LEFT)
+			{
+				new_data.d_left = 1;
+			}
+			if(buttons_and_triggers & XPAD_HAT_RIGHT)
+			{
+				new_data.d_right = 1;
+			}
+			if(buttons_and_triggers & XPAD_HAT_UP)
+			{
+				new_data.d_up = 1;
+			}
+			if(buttons_and_triggers & XPAD_HAT_DOWN)
+			{
+				new_data.d_down = 1;
+			}
+			if(buttons_and_triggers & LT_MASK)
+			{
+				new_data.l = 1;
+			}
+			if(buttons_and_triggers & RT_MASK)
+			{
+				new_data.r = 1;
+			}
+			if(buttons_and_triggers & XPAD_PAD_RB)
+			{
+				new_data.z = 1;
+			}
+			if(buttons_and_triggers & XPAD_START)
+			{
+				new_data.start = 1;
+			}
+
+			// triggers
+			new_data.l_trigger = reverse(trigger_l);
+			new_data.r_trigger = reverse(trigger_r);
+
+			// ----- begin nrage replication analog code -----
+			const float N64_MAX = 127*(controls.XpadControls.range/100.0f);
+			float deadzoneValue = (controls.XpadControls.deadzone/100.0f) * XPAD_MAX;
+			float deadzoneRelation = XPAD_MAX / (XPAD_MAX - deadzoneValue);
+
+			float unscaled_result = 0;
+
+			int16_t temp_stick_val = 0;
+
+			if(stick_lx >= deadzoneValue) // positive = right
+			{
+				unscaled_result = (stick_lx - deadzoneValue) * deadzoneRelation;
+				LSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+			}
+			else if(stick_lx <= (-deadzoneValue)) // negative = left
+			{
+				// just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
+				temp_stick_val = -(stick_lx+1); // compute as positive, then negate at the end
+				unscaled_result = (temp_stick_val - deadzoneValue) * deadzoneRelation;
+				LSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+				LSX = -LSX;
+			}
+			else
+			{
+				LSX = 0;
+			}
+
+			if(stick_ly >= deadzoneValue) // positive = up
+			{
+				unscaled_result = (stick_ly - deadzoneValue) * deadzoneRelation;
+				LSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+			}
+			else if(stick_ly <= (-deadzoneValue)) // negative = down
+			{
+				// just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
+				temp_stick_val = -(stick_ly+1); // compute as positive, then negate at the end
+				unscaled_result = (temp_stick_val - deadzoneValue) * deadzoneRelation;
+				LSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+				LSY = -LSY;
+			}
+			else
+			{
+				LSY = 0;
+			}
+
+			// unlike n64, gc is 0-255 instead of -128 to 127
+			LSX = (uint8_t)((int8_t)(LSX)+128);
+			LSY = (uint8_t)((int8_t)(LSY)+128);
+
+			new_data.a_x_axis = reverse(LSX);
+			new_data.a_y_axis = reverse(LSY);
+
+			if(stick_rx >= deadzoneValue) // positive = right
+			{
+				unscaled_result = (stick_rx - deadzoneValue) * deadzoneRelation;
+				RSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+			}
+			else if(stick_rx <= (-deadzoneValue)) // negative = left
+			{
+				// just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
+				temp_stick_val = -(stick_rx+1); // compute as positive, then negate at the end
+				unscaled_result = (temp_stick_val - deadzoneValue) * deadzoneRelation;
+				RSX = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+				RSX = -RSX;
+			}
+			else
+			{
+				RSX = 0;
+			}
+
+			if(stick_ry >= deadzoneValue) // positive = up
+			{
+				unscaled_result = (stick_ry - deadzoneValue) * deadzoneRelation;
+				RSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+			}
+			else if(stick_ry <= (-deadzoneValue)) // negative = down
+			{
+				// just in case it's -32768 it cannot be negated. otherwise the 1 is negligible.
+				temp_stick_val = -(stick_ry+1); // compute as positive, then negate at the end
+				unscaled_result = (temp_stick_val - deadzoneValue) * deadzoneRelation;
+				RSY = (uint8_t)(unscaled_result * (N64_MAX / XPAD_MAX));
+				RSY = -RSY;
+			}
+			else
+			{
+				RSY = 0;
+			}
+
+			// unlike n64, gc is 0-255 instead of -128 to 127
+			RSX = (uint8_t)((int8_t)(RSX)+128);
+			RSY = (uint8_t)((int8_t)(RSY)+128);
+
+			new_data.c_x_axis = reverse(RSX);
+			new_data.c_y_axis = reverse(RSY);
+
+			// ----- end nrage replication analog code -----
+
+			__disable_irq();
+			memcpy(&gc_data, &new_data,8);
+			__enable_irq();
+		}
     }
     else if(state == STATE_SENSITIVITY)
 	{

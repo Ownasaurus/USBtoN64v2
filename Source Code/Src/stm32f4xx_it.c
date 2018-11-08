@@ -36,12 +36,17 @@
 #include "stm32f4xx_it.h"
 
 /* USER CODE BEGIN 0 */
-unsigned int readCommand();
+uint32_t readCommand();
 void my_wait_us_asm(int n);
 void SetN64DataOutputMode();
 void SetN64DataInputMode();
-void SendIdentity();
-void SendControllerData();
+void SendIdentityN64();
+void SendIdentityGC();
+void SendControllerDataN64();
+void SendControllerDataGC();
+void SendOriginGC();
+
+int8_t identify_attempted = 0;
 
 /* USER CODE END 0 */
 
@@ -82,7 +87,9 @@ void EXTI9_5_IRQHandler(void)
   /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 	// Read 64 command
 	__disable_irq();
-	uint8_t cmd = readCommand();
+	uint32_t cmd;
+
+	cmd = readCommand();
 
 	my_wait_us_asm(2); // wait a small amount of time before replying
 
@@ -92,11 +99,43 @@ void EXTI9_5_IRQHandler(void)
 	switch(cmd)
 	{
 	  case 0x00: // identity
-	  case 0xFF: // reset
-		  SendIdentity();
+		  // need to determine which console is connected
+		  if(output_type != OUTPUT_UNDEFINED) // re-detect output state
+		  {
+			  output_type = OUTPUT_UNDEFINED;
+			  identify_attempted = 0;
+		  }
+
+		  // test responding as GC and see if it responds appropriately
+		  if(identify_attempted == 0)
+		  {
+			  SendIdentityGC();
+			  output_type = OUTPUT_GC;
+		  }
+		  // then test responding as N64 if GC didn't work
+		  else
+		  {
+			  SendIdentityN64();
+			  output_type = OUTPUT_N64;
+		  }
+
+		  // if nothing worked for whatever reason, reset back to GC attempts
+		  identify_attempted = 1 - identify_attempted;
 		  break;
-	  case 0x01: // poll for state
-		  SendControllerData();
+	  case 0xFF: // N64 reset
+		  SendIdentityN64();
+		  break;
+	  case 0x01: // poll for N64 state
+		  output_type = OUTPUT_N64;
+		  SendControllerDataN64();
+		  break;
+	  case 0x41: //gamecube origin call
+		  SendOriginGC();
+		  break;
+	  case 0x400302:
+	  case 0x400300:
+	  case 0x400301:
+		  SendControllerDataGC();
 		  break;
 	  case 0x02:
 	  case 0x03:
