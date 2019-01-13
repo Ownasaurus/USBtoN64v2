@@ -9,6 +9,20 @@
 <grid distance="0.1" unitdist="inch" unit="inch" style="lines" multiple="1" display="no" altdistance="0.01" altunitdist="inch" altunit="inch"/>
 <layers>
 <layer number="1" name="Top" color="4" fill="1" visible="no" active="no"/>
+<layer number="2" name="Route2" color="1" fill="3" visible="no" active="no"/>
+<layer number="3" name="Route3" color="4" fill="3" visible="no" active="no"/>
+<layer number="4" name="Route4" color="1" fill="4" visible="no" active="no"/>
+<layer number="5" name="Route5" color="4" fill="4" visible="no" active="no"/>
+<layer number="6" name="Route6" color="1" fill="8" visible="no" active="no"/>
+<layer number="7" name="Route7" color="4" fill="8" visible="no" active="no"/>
+<layer number="8" name="Route8" color="1" fill="2" visible="no" active="no"/>
+<layer number="9" name="Route9" color="4" fill="2" visible="no" active="no"/>
+<layer number="10" name="Route10" color="1" fill="7" visible="no" active="no"/>
+<layer number="11" name="Route11" color="4" fill="7" visible="no" active="no"/>
+<layer number="12" name="Route12" color="1" fill="5" visible="no" active="no"/>
+<layer number="13" name="Route13" color="4" fill="5" visible="no" active="no"/>
+<layer number="14" name="Route14" color="1" fill="6" visible="no" active="no"/>
+<layer number="15" name="Route15" color="4" fill="6" visible="no" active="no"/>
 <layer number="16" name="Bottom" color="1" fill="1" visible="no" active="no"/>
 <layer number="17" name="Pads" color="2" fill="1" visible="no" active="no"/>
 <layer number="18" name="Vias" color="2" fill="1" visible="no" active="no"/>
@@ -229,6 +243,7 @@
 <smd name="46" x="5.68" y="2.75" dx="1.56" dy="0.28" layer="1" roundness="50"/>
 <smd name="47" x="5.68" y="3.25" dx="1.56" dy="0.28" layer="1" roundness="50"/>
 <smd name="48" x="5.68" y="3.75" dx="1.56" dy="0.28" layer="1" roundness="50"/>
+<circle x="3.81" y="-3.81" radius="0.457903125" width="0.127" layer="21"/>
 </package>
 </packages>
 <symbols>
@@ -1221,6 +1236,26 @@ In this library the device names are the same as the pin names of the symbols, t
 <smd name="3" x="6.75" y="3.87" dx="2.2" dy="1.4" layer="1"/>
 <smd name="1" x="0.45" y="1.32" dx="2.2" dy="1.4" layer="1"/>
 <smd name="4" x="6.65" y="1.32" dx="2.4" dy="1.4" layer="1"/>
+<wire x1="7.2" y1="1.2" x2="7.2" y2="0.15" width="0.127" layer="21"/>
+<wire x1="7.2" y1="0.15" x2="7.05" y2="0" width="0.127" layer="21" curve="126.87"/>
+<wire x1="7.05" y1="0" x2="3.75" y2="0" width="0.127" layer="21"/>
+<wire x1="3.75" y1="0" x2="3.45" y2="0" width="0.127" layer="21" curve="180"/>
+<wire x1="3.45" y1="0" x2="0.15" y2="0" width="0.127" layer="21"/>
+<wire x1="0.15" y1="0" x2="0" y2="0.15" width="0.127" layer="21" curve="126.87"/>
+<wire x1="0" y1="0.15" x2="0" y2="1.2" width="0.127" layer="21"/>
+<wire x1="0" y1="1.2" x2="0" y2="1.45" width="0.127" layer="21" curve="180"/>
+<wire x1="0" y1="1.45" x2="0" y2="3.75" width="0.127" layer="21"/>
+<wire x1="0" y1="3.75" x2="0" y2="4" width="0.127" layer="21" curve="180"/>
+<wire x1="0" y1="4" x2="0" y2="5.05" width="0.127" layer="21"/>
+<wire x1="0" y1="5.05" x2="0.15" y2="5.2" width="0.127" layer="21" curve="126.87"/>
+<wire x1="0.15" y1="5.2" x2="3.45" y2="5.2" width="0.127" layer="21"/>
+<wire x1="3.45" y1="5.2" x2="3.75" y2="5.2" width="0.127" layer="21" curve="180"/>
+<wire x1="3.75" y1="5.2" x2="7.05" y2="5.2" width="0.127" layer="21"/>
+<wire x1="7.05" y1="5.2" x2="7.2" y2="5.05" width="0.127" layer="21" curve="126.87"/>
+<wire x1="7.2" y1="5.05" x2="7.2" y2="4" width="0.127" layer="21"/>
+<wire x1="7.2" y1="4" x2="7.2" y2="3.75" width="0.127" layer="21" curve="180"/>
+<wire x1="7.2" y1="3.75" x2="7.2" y2="1.45" width="0.127" layer="21"/>
+<wire x1="7.2" y1="1.45" x2="7.2" y2="1.2" width="0.127" layer="21" curve="180"/>
 </package>
 </packages>
 <symbols>
@@ -6130,6 +6165,7 @@ Standard 1-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <wire x1="2.51" y1="1.95" x2="2.51" y2="-1.95" width="0.127" layer="21"/>
 <wire x1="2.51" y1="-1.95" x2="-2.51" y2="-1.95" width="0.127" layer="21"/>
 <wire x1="-2.51" y1="-1.95" x2="-2.51" y2="1.95" width="0.127" layer="21"/>
+<wire x1="0" y1="1.905" x2="0" y2="2.286" width="0.127" layer="21"/>
 </package>
 </packages>
 <symbols>
@@ -6415,6 +6451,7 @@ Standard 1-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <smd name="8" x="2.0574" y="0" dx="1.4986" dy="0.2794" layer="1"/>
 <smd name="9" x="2.0574" y="0.508" dx="1.4986" dy="0.2794" layer="1"/>
 <smd name="10" x="2.0574" y="0.9906" dx="1.4986" dy="0.2794" layer="1"/>
+<circle x="-0.889" y="1.016" radius="0.127" width="0.127" layer="21"/>
 </package>
 </packages>
 <symbols>
@@ -6529,6 +6566,8 @@ Standard 1-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <part name="USB_MUX" library="FSUSB30MUX" deviceset="FSUSB30MUX" device=""/>
 <part name="GND15" library="supply1" library_urn="urn:adsk.eagle:library:371" deviceset="GND" device=""/>
 <part name="SUPPLY8" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="+5V" device=""/>
+<part name="J3" library="SparkFun-Connectors" deviceset="M01" device="PTH" value="GC_Data"/>
+<part name="J4" library="SparkFun-Connectors" deviceset="M01" device="PTH" value="GC_GND"/>
 </parts>
 <sheets>
 <sheet>
@@ -6587,6 +6626,8 @@ Standard 1-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <instance part="USB_MUX" gate="A" x="-96.52" y="83.82"/>
 <instance part="GND15" gate="1" x="-121.92" y="86.36" rot="R270"/>
 <instance part="SUPPLY8" gate="+5V" x="-160.02" y="2.54" rot="R270"/>
+<instance part="J3" gate="G$1" x="-220.98" y="48.26" rot="R270"/>
+<instance part="J4" gate="G$1" x="-182.88" y="48.26" rot="R270"/>
 </instances>
 <busses>
 </busses>
@@ -6643,6 +6684,10 @@ Standard 1-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <pinref part="J2" gate="G$1" pin="1"/>
 <wire x1="-195.58" y1="40.64" x2="-195.58" y2="35.56" width="0.1524" layer="91"/>
 <pinref part="GND11" gate="1" pin="GND"/>
+<pinref part="J4" gate="G$1" pin="1"/>
+<wire x1="-182.88" y1="40.64" x2="-182.88" y2="35.56" width="0.1524" layer="91"/>
+<wire x1="-182.88" y1="35.56" x2="-195.58" y2="35.56" width="0.1524" layer="91"/>
+<junction x="-195.58" y="35.56"/>
 </segment>
 <segment>
 <pinref part="GND12" gate="1" pin="GND"/>
@@ -6819,7 +6864,12 @@ Standard 1-pin 0.1" header. Use with straight break away headers (SKU : PRT-0011
 <pinref part="J1" gate="G$1" pin="1"/>
 <pinref part="U1" gate="G$1" pin="PA8/MCO1/TIM1_CH1/I2C3_SCL/USART1_CK/OTG_FS_SOF/EVENTOUT"/>
 <wire x1="-132.08" y1="12.7" x2="-208.28" y2="12.7" width="0.1524" layer="91"/>
-<wire x1="-208.28" y1="12.7" x2="-208.28" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="-208.28" y1="12.7" x2="-208.28" y2="35.56" width="0.1524" layer="91"/>
+<pinref part="J3" gate="G$1" pin="1"/>
+<wire x1="-208.28" y1="35.56" x2="-208.28" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="-220.98" y1="40.64" x2="-220.98" y2="35.56" width="0.1524" layer="91"/>
+<wire x1="-220.98" y1="35.56" x2="-208.28" y2="35.56" width="0.1524" layer="91"/>
+<junction x="-208.28" y="35.56"/>
 </segment>
 </net>
 <net name="+5V" class="0">
