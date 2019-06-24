@@ -1114,6 +1114,26 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 					}
 					new_data.x_axis = reverse((uint8_t)LSX);
 					new_data.y_axis = reverse((uint8_t)LSY);
+
+					if(stick_rx >= deadzoneValue) // positive = right
+					{
+						new_data.c_right = 1;
+
+					}
+					else if(stick_rx <= (-deadzoneValue)) // negative = left
+					{
+						new_data.c_left = 1;
+					}
+
+					if(stick_ry >= deadzoneValue) // positive = up
+					{
+						new_data.c_up = 1;
+					}
+					else if(stick_ry <= (-deadzoneValue)) // negative = down
+					{
+						new_data.c_down = 1;
+					}
+
 					// end of analog code
 
 					// atomic update of n64 state
@@ -1481,6 +1501,8 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				// conversion from [0,255] to [-128,+127]
 				int8_t stick_lx = ds4_state->LAnalogX - 128;
 				int8_t stick_ly = ds4_state->LAnalogY - 128;
+				int8_t stick_rx = ds4_state->RAnalogX - 128;
+				int8_t stick_ry = ds4_state->RAnalogY - 128;
 
 				if(stick_lx >= deadzoneValue) // positive = right
 				{
@@ -1511,6 +1533,26 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				}
 				new_data.x_axis = reverse((uint8_t)LSX);
 				new_data.y_axis = reverse((uint8_t)LSY);
+
+				if(stick_rx >= deadzoneValue) // positive = right
+				{
+					new_data.c_right = 1;
+
+				}
+				else if(stick_rx <= (-deadzoneValue)) // negative = left
+				{
+					new_data.c_left = 1;
+				}
+
+				if(stick_ry >= deadzoneValue) // positive = up
+				{
+					new_data.c_up = 1;
+				}
+				else if(stick_ry <= (-deadzoneValue)) // negative = down
+				{
+					new_data.c_down = 1;
+				}
+
 				// end of analog code
 
 				// atomic update of n64 state
