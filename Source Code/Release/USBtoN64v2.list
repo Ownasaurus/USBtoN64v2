@@ -5857,7 +5857,7 @@ Disassembly of section .text:
  8003e90:	eef1 fa10 	vmrs	APSR_nzcv, fpscr
  8003e94:	f200 81b7 	bhi.w	8004206 <USBH_HID_EventCallback+0xc46>
  8003e98:	f89d 3069 	ldrb.w	r3, [sp, #105]	; 0x69
- 8003e9c:	f043 0310 	orr.w	r3, r3, #16
+ 8003e9c:	f043 0320 	orr.w	r3, r3, #32
  8003ea0:	f88d 3069 	strb.w	r3, [sp, #105]	; 0x69
  8003ea4:	e6ad      	b.n	8003c02 <USBH_HID_EventCallback+0x642>
  8003ea6:	4b3c      	ldr	r3, [pc, #240]	; (8003f98 <USBH_HID_EventCallback+0x9d8>)
@@ -6148,7 +6148,7 @@ Disassembly of section .text:
  800420e:	eef1 fa10 	vmrs	APSR_nzcv, fpscr
  8004212:	f63f acf6 	bhi.w	8003c02 <USBH_HID_EventCallback+0x642>
  8004216:	f89d 3069 	ldrb.w	r3, [sp, #105]	; 0x69
- 800421a:	f043 0320 	orr.w	r3, r3, #32
+ 800421a:	f043 0310 	orr.w	r3, r3, #16
  800421e:	f88d 3069 	strb.w	r3, [sp, #105]	; 0x69
  8004222:	e4ee      	b.n	8003c02 <USBH_HID_EventCallback+0x642>
  8004224:	f04f 0efe 	mov.w	lr, #254	; 0xfe

@@ -1125,13 +1125,13 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						new_data.c_left = 1;
 					}
 
-					if(stick_ry >= deadzoneValue) // positive = up
-					{
-						new_data.c_up = 1;
-					}
-					else if(stick_ry <= (-deadzoneValue)) // negative = down
+					if(stick_ry >= deadzoneValue) // positive = down
 					{
 						new_data.c_down = 1;
+					}
+					else if(stick_ry <= (-deadzoneValue)) // negative = up
+					{
+						new_data.c_up = 1;
 					}
 
 					// end of analog code
@@ -1544,13 +1544,13 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 					new_data.c_left = 1;
 				}
 
-				if(stick_ry >= deadzoneValue) // positive = up
-				{
-					new_data.c_up = 1;
-				}
-				else if(stick_ry <= (-deadzoneValue)) // negative = down
+				if(stick_ry >= deadzoneValue) // positive = down
 				{
 					new_data.c_down = 1;
+				}
+				else if(stick_ry <= (-deadzoneValue)) // negative = up
+				{
+					new_data.c_up = 1;
 				}
 
 				// end of analog code
