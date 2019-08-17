@@ -888,106 +888,230 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 
 			if(state == NORMAL) //used to check state variable for changing controls
 			{
-				memset(&new_data,0,4);
-
-				for(int index = 0;index < 6;index++)
+				if(output_type == OUTPUT_N64)
 				{
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_up)
-					{
-						new_data.y_axis = 0xFE; // -128 bit reversed (100% range)
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_down)
-					{
-						new_data.y_axis = 0x01; // +127 bit reversed (100% range)
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_left)
-					{
-						new_data.x_axis = 0x01; // +127 bit reversed (100% range)
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_right)
-					{
-						new_data.x_axis = 0xFE; // -128 bit reversed (100% range)
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_up)
-					{
-						new_data.up = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_down)
-					{
-						new_data.down = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_left)
-					{
-						new_data.left = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_right)
-					{
-						new_data.right = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a)
-					{
-						new_data.a = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_b)
-					{
-						new_data.b = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_l)
-					{
-						new_data.l = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_r)
-					{
-						new_data.r = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_z)
-					{
-						new_data.z = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_start)
-					{
-						new_data.start = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_up)
-					{
-						new_data.c_up = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_down)
-					{
-						new_data.c_down = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_left)
-					{
-						new_data.c_left = 1;
-						continue;
-					}
-					if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_right)
-					{
-						new_data.c_right = 1;
-						continue;
-					}
-				}
+					memset(&new_data,0,4);
 
-				// atomic update of n64 state
-				__disable_irq();
-				memcpy(&n64_data, &new_data,4);
-				__enable_irq();
+					for(int index = 0;index < 6;index++)
+					{
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_up)
+						{
+							new_data.y_axis = 0xFE; // -128 bit reversed (100% range)
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_down)
+						{
+							new_data.y_axis = 0x01; // +127 bit reversed (100% range)
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_left)
+						{
+							new_data.x_axis = 0x01; // +127 bit reversed (100% range)
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a_right)
+						{
+							new_data.x_axis = 0xFE; // -128 bit reversed (100% range)
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_up)
+						{
+							new_data.up = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_down)
+						{
+							new_data.down = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_left)
+						{
+							new_data.left = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_d_right)
+						{
+							new_data.right = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_a)
+						{
+							new_data.a = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_b)
+						{
+							new_data.b = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_l)
+						{
+							new_data.l = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_r)
+						{
+							new_data.r = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_z)
+						{
+							new_data.z = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_start)
+						{
+							new_data.start = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_up)
+						{
+							new_data.c_up = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_down)
+						{
+							new_data.c_down = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_left)
+						{
+							new_data.c_left = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == controls.KBControls.KEYBOARD_c_right)
+						{
+							new_data.c_right = 1;
+							continue;
+						}
+					}
+
+					// atomic update of n64 state
+					__disable_irq();
+					memcpy(&n64_data, &new_data,4);
+					__enable_irq();
+				}
+				else if(output_type == OUTPUT_GC)
+				{
+					memset(&new_gc_data,0,8);
+
+					new_gc_data.beginning_one = 1;
+					new_gc_data.a_x_axis = reverse(0x80);
+					new_gc_data.a_y_axis = reverse(0x80);
+					new_gc_data.c_x_axis = reverse(0x80);
+					new_gc_data.c_y_axis = reverse(0x80);
+
+					// unlike n64, gc is 0-255 instead of -128 to 127
+
+					for(int index = 0;index < 6;index++)
+					{
+						if(kb_state->keys[index] == 0x1A) // W = up
+						{
+							new_gc_data.a_y_axis = 0xFF;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x16) // S = down
+						{
+							new_gc_data.a_y_axis = 0x00;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x04) // A = left
+						{
+							new_gc_data.a_x_axis = 0x00;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x07) // D = right
+						{
+							new_gc_data.a_x_axis = 0xFF;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x52) // Up arrow
+						{
+							new_gc_data.d_up = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x51) // Down arrow
+						{
+							new_gc_data.d_down = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x50) // Left arrow
+						{
+							new_gc_data.d_left = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x4F) // Right arrow
+						{
+							new_gc_data.d_right = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x0D) // J
+						{
+							new_gc_data.a = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x0B) // H
+						{
+							new_gc_data.b = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x0E) // K
+						{
+							new_gc_data.x = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x10) // M
+						{
+							new_gc_data.y = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x0F) // L
+						{
+							new_gc_data.l = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x33) // ;
+						{
+							new_gc_data.r = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x14) // Q
+						{
+							new_gc_data.z = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x28) // Enter
+						{
+							new_gc_data.start = 1;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x0C) // I
+						{
+							new_gc_data.c_y_axis = 0xFF;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x11) // N
+						{
+							new_gc_data.c_y_axis = 0x00;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x18) // U
+						{
+							new_gc_data.c_x_axis = 0x00;
+							continue;
+						}
+						if(kb_state->keys[index] == 0x12) // O
+						{
+							new_gc_data.c_x_axis = 0xFF;
+							continue;
+						}
+					}
+
+					// atomic update of n64 state
+					__disable_irq();
+					memcpy(&gc_data, &new_gc_data,8);
+					__enable_irq();
+				}
 			}
 			else
 			{
