@@ -1007,7 +1007,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 					{
 						if(kb_state->keys[index] == 0x1A) // W = up
 						{
-							new_gc_data.a_y_axis = 0xFF;
+							new_gc_data.a_y_axis = 0xC8;
 							continue;
 						}
 						if(kb_state->keys[index] == 0x16) // S = down
@@ -1022,7 +1022,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						}
 						if(kb_state->keys[index] == 0x07) // D = right
 						{
-							new_gc_data.a_x_axis = 0xFF;
+							new_gc_data.a_x_axis = 0xC8;
 							continue;
 						}
 						if(kb_state->keys[index] == 0x52) // Up arrow
@@ -1068,14 +1068,16 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						if(kb_state->keys[index] == 0x0F) // L
 						{
 							new_gc_data.l = 1;
+							new_gc_data.l_trigger = 0xFF;
 							continue;
 						}
 						if(kb_state->keys[index] == 0x33) // ;
 						{
 							new_gc_data.r = 1;
+							new_gc_data.r_trigger = 0xFF;
 							continue;
 						}
-						if(kb_state->keys[index] == 0x14) // Q
+						if(kb_state->keys[index] == 0x08) // E
 						{
 							new_gc_data.z = 1;
 							continue;
