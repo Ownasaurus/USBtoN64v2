@@ -1004,17 +1004,15 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 
 					// unlike n64, gc is 0-255 instead of -128 to 127
 
+					if(kb_state->lshift != 0) // lshift = tilt modifier
+					{
+						tilt_modifier = 1;
+					}
+
 					for(int index = 0;index < 6;index++)
 					{
-						//if(kb_state->keys[index] == 0x39) // caps lock = modifier
-						if(kb_state->keys[index] == 0x2C) // spacebar = modifier
-						{
-							tilt_modifier = 1;
-							continue;
-						}
 						if(kb_state->keys[index] == 0x1A) // W = up
 						{
-							//new_gc_data.a_y_axis = reverse(0xC8);
 							new_gc_data.a_y_axis = reverse(0xFF);
 							continue;
 						}
@@ -1030,7 +1028,6 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						}
 						if(kb_state->keys[index] == 0x07) // D = right
 						{
-							//new_gc_data.a_x_axis = reverse(0xC8);
 							new_gc_data.a_x_axis = reverse(0xFF);
 							continue;
 						}
