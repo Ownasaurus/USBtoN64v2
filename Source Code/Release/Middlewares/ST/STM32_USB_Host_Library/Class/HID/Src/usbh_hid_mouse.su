@@ -1,2 +1,0 @@
-usbh_hid_mouse.c:176:20:USBH_HID_MouseInit	16	static
-usbh_hid_mouse.c:204:25:USBH_HID_GetMouseInfo	8	static

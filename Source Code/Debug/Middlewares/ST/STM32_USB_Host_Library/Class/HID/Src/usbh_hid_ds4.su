@@ -1,4 +1,0 @@
-usbh_hid_ds4.c:34:20:USBH_HID_DS4Init	24	static
-usbh_hid_ds4.c:52:27:USBH_HID_DS4Decode	24	static
-usbh_hid_ds4.c:74:23:USBH_HID_GetDS4Info	16	static
-usbh_hid_ds4.c:87:10:USBH_HID_GetDS4ButtonsAndTriggers	16	static

@@ -1,3 +1,0 @@
-usbh_hid_ds3.c:23:20:USBH_HID_DS3Init	16	static
-usbh_hid_ds3.c:63:23:USBH_HID_GetDS3Info	16	static
-usbh_hid_ds3.c:76:10:USBH_HID_GetDS3ButtonsAndTriggers	0	static

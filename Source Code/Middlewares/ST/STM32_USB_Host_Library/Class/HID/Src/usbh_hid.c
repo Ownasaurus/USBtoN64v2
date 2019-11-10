@@ -994,6 +994,7 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				else if(output_type == OUTPUT_GC)
 				{
 					memset(&new_gc_data,0,8);
+					uint8_t tilt_modifier = 0;
 
 					new_gc_data.beginning_one = 1;
 					new_gc_data.a_x_axis = reverse(0x80);
@@ -1005,9 +1006,16 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 
 					for(int index = 0;index < 6;index++)
 					{
+						//if(kb_state->keys[index] == 0x39) // caps lock = modifier
+						if(kb_state->keys[index] == 0x2C) // spacebar = modifier
+						{
+							tilt_modifier = 1;
+							continue;
+						}
 						if(kb_state->keys[index] == 0x1A) // W = up
 						{
-							new_gc_data.a_y_axis = 0xC8;
+							//new_gc_data.a_y_axis = reverse(0xC8);
+							new_gc_data.a_y_axis = reverse(0xFF);
 							continue;
 						}
 						if(kb_state->keys[index] == 0x16) // S = down
@@ -1022,7 +1030,8 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						}
 						if(kb_state->keys[index] == 0x07) // D = right
 						{
-							new_gc_data.a_x_axis = 0xC8;
+							//new_gc_data.a_x_axis = reverse(0xC8);
+							new_gc_data.a_x_axis = reverse(0xFF);
 							continue;
 						}
 						if(kb_state->keys[index] == 0x52) // Up arrow
@@ -1109,7 +1118,46 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						}
 					}
 
-					// atomic update of n64 state
+					if(tilt_modifier == 1)
+					{
+						if(new_gc_data.a_x_axis == 0x00)
+						{
+							new_gc_data.a_x_axis = reverse(0x4A);
+						}
+						else if(new_gc_data.a_x_axis == 0xFF)
+						{
+							new_gc_data.a_x_axis = reverse(0xB6);
+						}
+
+						if(new_gc_data.a_y_axis == 0x00)
+						{
+							new_gc_data.a_y_axis = reverse(0x4A);
+						}
+						else if(new_gc_data.a_y_axis == 0xFF) // up
+						{
+							new_gc_data.a_y_axis = reverse(0xA8); // tilt but do not jump
+						}
+
+						if(new_gc_data.c_x_axis == 0x00)
+						{
+							new_gc_data.c_x_axis = reverse(0x4A);
+						}
+						else if(new_gc_data.c_x_axis == 0xFF)
+						{
+							new_gc_data.c_x_axis = reverse(0xB6);
+						}
+
+						if(new_gc_data.c_y_axis == 0x00)
+						{
+							new_gc_data.c_y_axis = reverse(0x4A);
+						}
+						else if(new_gc_data.c_y_axis == 0xFF)
+						{
+							new_gc_data.c_y_axis = reverse(0xB6);
+						}
+					}
+
+					// atomic update of gc state
 					__disable_irq();
 					memcpy(&gc_data, &new_gc_data,8);
 					__enable_irq();
