@@ -891,6 +891,12 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 				if(output_type == OUTPUT_N64)
 				{
 					memset(&new_data,0,4);
+					uint8_t tilt_modifier = 0;
+
+					if(kb_state->lshift != 0) // lshift = tilt modifier
+					{
+						tilt_modifier = 1;
+					}
 
 					for(int index = 0;index < 6;index++)
 					{
@@ -983,6 +989,27 @@ __weak void USBH_HID_EventCallback(USBH_HandleTypeDef *phost)
 						{
 							new_data.c_right = 1;
 							continue;
+						}
+					}
+
+					if(tilt_modifier == 1)
+					{
+						if(new_data.x_axis == 0x01) // -128 bit reversed
+						{
+							new_data.x_axis = 0x9B; // -39 bit reversed
+						}
+						else if(new_data.x_axis == 0xFE) // +127 bit reversed
+						{
+							new_data.x_axis = 0xE4; // +39 bit reversed
+						}
+
+						if(new_data.y_axis == 0x01)
+						{
+							new_data.y_axis = 0x9B;
+						}
+						else if(new_data.y_axis == 0xFE)
+						{
+							new_data.y_axis = 0xE4;
 						}
 					}
 
